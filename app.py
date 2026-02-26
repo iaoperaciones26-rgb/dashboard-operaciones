@@ -110,22 +110,24 @@ def multiselect_filter(label, column):
 
 anio = multiselect_filter("Año", "AÑO")
 mes = multiselect_filter("Mes", "MES")
-canal = multiselect_filter("Canal de Origen", "Canal Origen")
 estado = multiselect_filter("Estado de Asistencia", "Estado de Asistencia")
+canal = multiselect_filter("Canal de Origen", "Canal Origen")
+grupo = multiselect_filter("Grupo de Servicio", "Grupo de Servicio")
 servicio = multiselect_filter("Nombre del Servicio", "Nombre del Servicio")
 subservicio = multiselect_filter("Subservicio", "Nombre del Subservicio")
-proveedor = multiselect_filter("Proveedor", "Nombre del Proveedor")
-ciudad = multiselect_filter("Ciudad", "Ciudad")
-provincia = multiselect_filter("Provincia", "Provincia")
-pais = multiselect_filter("País", "País")
-grupo = multiselect_filter("Grupo de Servicio", "Grupo de Servicio")
-cliente = multiselect_filter("Cliente Institucional", "Cliente Institucional")
-tipo_cliente = multiselect_filter("Tipo de Cliente", "TIPO DE CLIENTE")
-evento = multiselect_filter("Tipo de Evento", "Tipo de Evento")
 especialidad = multiselect_filter("Especialidad Médica", "ESPECIALIDAD MEDICA (CITAS)")
+proveedor = multiselect_filter("Proveedor", "Nombre del Proveedor")
+pais = multiselect_filter("País", "País")
+provincia = multiselect_filter("Provincia", "Provincia")
+ciudad = multiselect_filter("Ciudad", "Ciudad")
 local_foraneo = multiselect_filter("Local / Foráneo", "Local_Foráneo")
+tipo_cliente = multiselect_filter("Tipo de Cliente", "TIPO DE CLIENTE")
+cliente = multiselect_filter("Cliente Institucional", "Cliente Institucional")
 cuenta = multiselect_filter("Nombre de la cuenta", "Nombre de la cuenta")
 plan = multiselect_filter("Nombre del plan", "Nombre del plan")
+evento = multiselect_filter("Tipo de Evento", "Tipo de Evento")
+
+
 
 df_f = df.copy()
 
@@ -135,11 +137,14 @@ if anio:
 if mes:
     df_f = df_f[df_f["MES"].isin(mes)]
 
+if estado:
+    df_f = df_f[df_f["Estado de Asistencia"].isin(estado)]
+
 if canal:
     df_f = df_f[df_f["Canal Origen"].isin(canal)]
 
-if estado:
-    df_f = df_f[df_f["Estado de Asistencia"].isin(estado)]
+if grupo:
+    df_f = df_f[df_f["Grupo de Servicio"].isin(grupo)]
 
 if servicio:
     df_f = df_f[df_f["Nombre del Servicio"].isin(servicio)]
@@ -147,41 +152,38 @@ if servicio:
 if subservicio:
     df_f = df_f[df_f["Nombre del Subservicio"].isin(subservicio)]
 
+if especialidad:
+    df_f = df_f[df_f["ESPECIALIDAD MEDICA (CITAS)"].isin(especialidad)]
+
 if proveedor:
     df_f = df_f[df_f["Nombre del Proveedor"].isin(proveedor)]
+
+if pais:
+    df_f = df_f[df_f["País"].isin(pais)]
+    
+if provincia:
+    df_f = df_f[df_f["Provincia"].isin(provincia)]
 
 if ciudad:
     df_f = df_f[df_f["Ciudad"].isin(ciudad)]
 
-if provincia:
-    df_f = df_f[df_f["Provincia"].isin(provincia)]
-
-if pais:
-    df_f = df_f[df_f["País"].isin(pais)]
-
-if grupo:
-    df_f = df_f[df_f["Grupo de Servicio"].isin(grupo)]
-
-if cliente:
-    df_f = df_f[df_f["Cliente Institucional"].isin(cliente)]
+if local_foraneo:
+    df_f = df_f[df_f["Local_Foráneo"].isin(local_foraneo)]
 
 if tipo_cliente:
     df_f = df_f[df_f["TIPO DE CLIENTE"].isin(tipo_cliente)]
 
-if evento:
-    df_f = df_f[df_f["Tipo de Evento"].isin(evento)]
-
-if especialidad:
-    df_f = df_f[df_f["ESPECIALIDAD MEDICA (CITAS)"].isin(especialidad)]
-
-if local_foraneo:
-    df_f = df_f[df_f["Local_Foráneo"].isin(local_foraneo)]
+if cliente:
+    df_f = df_f[df_f["Cliente Institucional"].isin(cliente)]
 
 if cuenta:
     df_f = df_f[df_f["Nombre de la cuenta"].isin(cuenta)]
 
 if plan:
     df_f = df_f[df_f["Nombre del plan"].isin(plan)]
+
+if evento:
+    df_f = df_f[df_f["Tipo de Evento"].isin(evento)]
 
 # ─────────────────────────────
 # KPIs
