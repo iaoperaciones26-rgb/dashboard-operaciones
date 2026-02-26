@@ -51,7 +51,7 @@ DATA_DIR = "data"
 os.makedirs(DATA_DIR, exist_ok=True)
 
 if uploaded_file:
-    df_new = pd.read_csv(uploaded_file)
+    df_new = pd.read_csv(uploaded_file, encoding="latin1")
     df_new.to_csv(f"{DATA_DIR}/asistencias_2026.csv", index=False)
     st.sidebar.success("CSV 2026 actualizado correctamente")
 
@@ -69,7 +69,7 @@ dfs = []
 for f in files:
     path = f"{DATA_DIR}/{f}"
     if os.path.exists(path):
-        temp = pd.read_csv(path)
+        temp = pd.read_csv(path, encoding="latin1")
         temp["AÑO"] = int(f.split("_")[1].replace(".csv", ""))
         dfs.append(temp)
 
