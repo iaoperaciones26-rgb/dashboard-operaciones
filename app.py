@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import os
-from datetime import datetime
 import plotly.express as px
 
 # ─────────────────────────────
@@ -78,8 +77,9 @@ if not dfs:
     st.stop()
 
 df = pd.concat(dfs, ignore_index=True)
+
 # ─────────────────────────────
-# LIMPIEZA Y FECHAS
+# FECHAS Y LIMPIEZA
 # ─────────────────────────────
 df["Fecha creación de asistencia"] = pd.to_datetime(
     df["Fecha creación de asistencia"],
@@ -87,9 +87,7 @@ df["Fecha creación de asistencia"] = pd.to_datetime(
 )
 
 df["MES"] = df["Fecha creación de asistencia"].dt.month
-df["DIA"] = df["Fecha creación de asistencia"].dt.day
 
-# LIMPIEZA USD
 for col in ["Total de Costo Global", "Total de importe pagado"]:
     df[col] = (
         df[col]
@@ -113,7 +111,6 @@ def multiselect_filter(label, column):
 
 anio = multiselect_filter("Año", "AÑO")
 mes = multiselect_filter("Mes", "MES")
-dia = multiselect_filter("Día", "DIA")
 canal = multiselect_filter("Canal de Origen", "Canal Origen")
 estado = multiselect_filter("Estado de Asistencia", "Estado de Asistencia")
 servicio = multiselect_filter("Nombre del Servicio", "Nombre del Servicio")
@@ -126,13 +123,14 @@ grupo = multiselect_filter("Grupo de Servicio", "Grupo de Servicio")
 cliente = multiselect_filter("Cliente Institucional", "Cliente Institucional")
 tipo_cliente = multiselect_filter("Tipo de Cliente", "TIPO DE CLIENTE")
 evento = multiselect_filter("Tipo de Evento", "Tipo de Evento")
-especialidad = multiselect_filter("Especialidad Médica","ESPECIALIDAD MEDICA (CITAS)")
+especialidad = multiselect_filter("Especialidad Médica", "ESPECIALIDAD MEDICA (CITAS)")
 local_foraneo = multiselect_filter("Local / Foráneo", "Local_Foráneo")
+cuenta = multiselect_filter("Nombre de la cuenta", "Nombre de la cuenta")
+plan = multiselect_filter("Nombre del plan", "Nombre del plan")
 
 df_f = df[
     (df["AÑO"].isin(anio)) &
     (df["MES"].isin(mes)) &
-    (df["DIA"].isin(dia)) &
     (df["Canal Origen"].isin(canal)) &
     (df["Estado de Asistencia"].isin(estado)) &
     (df["Nombre del Servicio"].isin(servicio)) &
@@ -146,7 +144,9 @@ df_f = df[
     (df["TIPO DE CLIENTE"].isin(tipo_cliente)) &
     (df["Tipo de Evento"].isin(evento)) &
     (df["ESPECIALIDAD MEDICA (CITAS)"].isin(especialidad)) &
-    (df["Local_Foráneo"].isin(local_foraneo))
+    (df["Local_Foráneo"].isin(local_foraneo)) &
+    (df["Nombre de la cuenta"].isin(cuenta)) &
+    (df["Nombre del plan"].isin(plan))
 ]
 
 # ─────────────────────────────
@@ -154,7 +154,7 @@ df_f = df[
 # ─────────────────────────────
 st.title("📊 Dashboard Operaciones GEA")
 
-total_asistencias = df_f["Número Asistencia"].nunique()
+total_asistencias = len(df_f)
 costo_total = df_f["Total de Costo Global"].sum()
 costo_promedio = costo_total / total_asistencias if total_asistencias > 0 else 0
 
@@ -168,8 +168,8 @@ col3.metric("💲 Costo promedio", f"${costo_promedio:,.2f}")
 # ─────────────────────────────
 st.subheader("📈 Tendencias")
 
-asist_mes = df_f.groupby("MES")["Número Asistencia"].nunique().reset_index()
-fig1 = px.line(asist_mes, x="MES", y="Número Asistencia", title="Asistencias por mes")
+asist_mes = df_f.groupby("MES").size().reset_index(name="Registros")
+fig1 = px.line(asist_mes, x="MES", y="Registros", title="Asistencias por mes")
 st.plotly_chart(fig1, use_container_width=True)
 
 costo_mes = df_f.groupby("MES")["Total de Costo Global"].sum().reset_index()
@@ -177,7 +177,40 @@ fig2 = px.line(costo_mes, x="MES", y="Total de Costo Global", title="Costo mensu
 st.plotly_chart(fig2, use_container_width=True)
 
 # ─────────────────────────────
-# TABLA FINAL
+# TOPS
 # ─────────────────────────────
-st.subheader("📄 Detalle de asistencias")
-st.dataframe(df_f, use_container_width=True)
+st.subheader("🏆 Top servicios y especialidades")
+
+col_a, col_b = st.columns(2)
+
+top_servicios = (
+    df_f["Nombre del Servicio"]
+    .value_counts()
+    .head(10)
+    .reset_index()
+    .rename(columns={"index": "Servicio", "Nombre del Servicio": "Registros"})
+)
+
+fig_serv = px.bar(
+    top_servicios,
+    x="Servicio",
+    y="Registros",
+    title="Top 10 Servicios"
+)
+col_a.plotly_chart(fig_serv, use_container_width=True)
+
+top_esp = (
+    df_f["ESPECIALIDAD MEDICA (CITAS)"]
+    .value_counts()
+    .head(10)
+    .reset_index()
+    .rename(columns={"index": "Especialidad", "ESPECIALIDAD MEDICA (CITAS)": "Registros"})
+)
+
+fig_esp = px.bar(
+    top_esp,
+    x="Especialidad",
+    y="Registros",
+    title="Top 10 Especialidades Médicas"
+)
+col_b.plotly_chart(fig_esp, use_container_width=True)
