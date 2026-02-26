@@ -105,8 +105,7 @@ st.sidebar.header("🎛️ Filtros")
 def multiselect_filter(label, column):
     return st.sidebar.multiselect(
         label,
-        sorted(df[column].dropna().unique()),
-        default=sorted(df[column].dropna().unique())
+        sorted(df[column].dropna().unique())
     )
 
 anio = multiselect_filter("Año", "AÑO")
@@ -128,26 +127,61 @@ local_foraneo = multiselect_filter("Local / Foráneo", "Local_Foráneo")
 cuenta = multiselect_filter("Nombre de la cuenta", "Nombre de la cuenta")
 plan = multiselect_filter("Nombre del plan", "Nombre del plan")
 
-df_f = df[
-    (df["AÑO"].isin(anio)) &
-    (df["MES"].isin(mes)) &
-    (df["Canal Origen"].isin(canal)) &
-    (df["Estado de Asistencia"].isin(estado)) &
-    (df["Nombre del Servicio"].isin(servicio)) &
-    (df["Nombre del Subservicio"].isin(subservicio)) &
-    (df["Nombre del Proveedor"].isin(proveedor)) &
-    (df["Ciudad"].isin(ciudad)) &
-    (df["Provincia"].isin(provincia)) &
-    (df["País"].isin(pais)) &
-    (df["Grupo de Servicio"].isin(grupo)) &
-    (df["Cliente Institucional"].isin(cliente)) &
-    (df["TIPO DE CLIENTE"].isin(tipo_cliente)) &
-    (df["Tipo de Evento"].isin(evento)) &
-    (df["ESPECIALIDAD MEDICA (CITAS)"].isin(especialidad)) &
-    (df["Local_Foráneo"].isin(local_foraneo)) &
-    (df["Nombre de la cuenta"].isin(cuenta)) &
-    (df["Nombre del plan"].isin(plan))
-]
+df_f = df.copy()
+
+if anio:
+    df_f = df_f[df_f["AÑO"].isin(anio)]
+
+if mes:
+    df_f = df_f[df_f["MES"].isin(mes)]
+
+if canal:
+    df_f = df_f[df_f["Canal Origen"].isin(canal)]
+
+if estado:
+    df_f = df_f[df_f["Estado de Asistencia"].isin(estado)]
+
+if servicio:
+    df_f = df_f[df_f["Nombre del Servicio"].isin(servicio)]
+
+if subservicio:
+    df_f = df_f[df_f["Nombre del Subservicio"].isin(subservicio)]
+
+if proveedor:
+    df_f = df_f[df_f["Nombre del Proveedor"].isin(proveedor)]
+
+if ciudad:
+    df_f = df_f[df_f["Ciudad"].isin(ciudad)]
+
+if provincia:
+    df_f = df_f[df_f["Provincia"].isin(provincia)]
+
+if pais:
+    df_f = df_f[df_f["País"].isin(pais)]
+
+if grupo:
+    df_f = df_f[df_f["Grupo de Servicio"].isin(grupo)]
+
+if cliente:
+    df_f = df_f[df_f["Cliente Institucional"].isin(cliente)]
+
+if tipo_cliente:
+    df_f = df_f[df_f["TIPO DE CLIENTE"].isin(tipo_cliente)]
+
+if evento:
+    df_f = df_f[df_f["Tipo de Evento"].isin(evento)]
+
+if especialidad:
+    df_f = df_f[df_f["ESPECIALIDAD MEDICA (CITAS)"].isin(especialidad)]
+
+if local_foraneo:
+    df_f = df_f[df_f["Local_Foráneo"].isin(local_foraneo)]
+
+if cuenta:
+    df_f = df_f[df_f["Nombre de la cuenta"].isin(cuenta)]
+
+if plan:
+    df_f = df_f[df_f["Nombre del plan"].isin(plan)]
 
 # ─────────────────────────────
 # KPIs
