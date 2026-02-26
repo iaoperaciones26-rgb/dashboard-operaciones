@@ -154,7 +154,7 @@ df_f = df[
 # ─────────────────────────────
 st.title("📊 Dashboard Operaciones GEA")
 
-total_asistencias = df_f["Número Asistencia"].nunique()
+total_asistencias = len(df_f)
 costo_total = df_f["Total de Costo Global"].sum()
 costo_promedio = costo_total / total_asistencias if total_asistencias > 0 else 0
 
