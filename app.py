@@ -127,7 +127,7 @@ cliente = multiselect_filter("Cliente Institucional", "Cliente Institucional")
 tipo_cliente = multiselect_filter("Tipo de Cliente", "TIPO DE CLIENTE")
 evento = multiselect_filter("Tipo de Evento", "Tipo de Evento")
 especialidad = multiselect_filter("Especialidad Médica","ESPECIALIDAD MEDICA (CITAS)")
-local_foraneo = multiselect_filter("Local / Foráneo", "Local_Foraneo")
+local_foraneo = multiselect_filter("Local / Foráneo", "Local_Foráneo")
 
 df_f = df[
     (df["AÑO"].isin(anio)) &
@@ -146,7 +146,7 @@ df_f = df[
     (df["TIPO DE CLIENTE"].isin(tipo_cliente)) &
     (df["Tipo de Evento"].isin(evento)) &
     (df["ESPECIALIDAD MEDICA (CITAS)"].isin(especialidad)) &
-    (df["Local_Foraneo"].isin(local_foraneo))
+    (df["Local_Foráneo"].isin(local_foraneo))
 ]
 
 # ─────────────────────────────
