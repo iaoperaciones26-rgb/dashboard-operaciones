@@ -270,3 +270,62 @@ fig_esp = px.bar(
     title="Top 10 Especialidades Médicas (por número de asistencias)"
 )
 col_b.plotly_chart(fig_esp, use_container_width=True)
+
+# ─────────────────────────────
+# ESTADO DE ASISTENCIA POR MES (TABLA ORDENADA)
+# ─────────────────────────────
+st.subheader("📋 Estado de Asistencia por Mes")
+
+tabla_estado = (
+    df_f
+    .groupby(["Estado de Asistencia", "MES"])["Número Asistencia"]
+    .count()
+    .reset_index()
+    .pivot(
+        index="Estado de Asistencia",
+        columns="MES",
+        values="Número Asistencia"
+    )
+    .fillna(0)
+    .astype(int)
+)
+
+# Agregar total por fila
+tabla_estado["Total general"] = tabla_estado.sum(axis=1)
+
+# Ordenar de mayor a menor por total
+tabla_estado = tabla_estado.sort_values(
+    by="Total general",
+    ascending=False
+)
+
+# Agregar fila Total general al final
+total_fila = tabla_estado.sum().to_frame().T
+total_fila.index = ["Total general"]
+
+tabla_estado = pd.concat([tabla_estado, total_fila])
+
+st.dataframe(tabla_estado, use_container_width=True)
+
+# ─────────────────────────────
+# GRÁFICO PASTEL ESTADO DE ASISTENCIA (ORDENADO)
+# ─────────────────────────────
+st.subheader("🥧 % Estado de Asistencia")
+
+estado_totales = (
+    df_f
+    .groupby("Estado de Asistencia")["Número Asistencia"]
+    .count()
+    .reset_index()
+    .sort_values(by="Número Asistencia", ascending=False)
+)
+
+fig_pie = px.pie(
+    estado_totales,
+    names="Estado de Asistencia",
+    values="Número Asistencia",
+    title="% Estado de Asistencia",
+    hole=0.4
+)
+
+st.plotly_chart(fig_pie, use_container_width=True)
