@@ -79,19 +79,6 @@ if not dfs:
 
 df = pd.concat(dfs, ignore_index=True)
 # ─────────────────────────────
-# NORMALIZAR NOMBRES DE COLUMNAS
-# ─────────────────────────────
-df.columns = (
-    df.columns
-      .str.strip()
-      .str.upper()
-      .str.replace("Á", "A")
-      .str.replace("É", "E")
-      .str.replace("Í", "I")
-      .str.replace("Ó", "O")
-      .str.replace("Ú", "U")
-)
-# ─────────────────────────────
 # LIMPIEZA Y FECHAS
 # ─────────────────────────────
 df["Fecha creación de asistencia"] = pd.to_datetime(
