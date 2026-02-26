@@ -154,7 +154,7 @@ df_f = df[
 # ─────────────────────────────
 st.title("📊 Dashboard Operaciones GEA")
 
-total_asistencias = len(df_f)
+total_asistencias = df_f["Número Asistencia"].count()
 costo_total = df_f["Total de Costo Global"].sum()
 costo_promedio = costo_total / total_asistencias if total_asistencias > 0 else 0
 
@@ -164,16 +164,36 @@ col2.metric("💲 Costo total", f"${costo_total:,.2f}")
 col3.metric("💲 Costo promedio", f"${costo_promedio:,.2f}")
 
 # ─────────────────────────────
-# GRÁFICOS
+# GRÁFICOS DE TENDENCIA
 # ─────────────────────────────
 st.subheader("📈 Tendencias")
 
-asist_mes = df_f.groupby("MES").size().reset_index(name="Registros")
-fig1 = px.line(asist_mes, x="MES", y="Registros", title="Asistencias por mes")
+asist_mes = (
+    df_f.groupby("MES")["Número Asistencia"]
+    .count()
+    .reset_index(name="Total asistencias")
+)
+
+fig1 = px.line(
+    asist_mes,
+    x="MES",
+    y="Total asistencias",
+    title="Asistencias por mes"
+)
 st.plotly_chart(fig1, use_container_width=True)
 
-costo_mes = df_f.groupby("MES")["Total de Costo Global"].sum().reset_index()
-fig2 = px.line(costo_mes, x="MES", y="Total de Costo Global", title="Costo mensual (USD)")
+costo_mes = (
+    df_f.groupby("MES")["Total de Costo Global"]
+    .sum()
+    .reset_index()
+)
+
+fig2 = px.line(
+    costo_mes,
+    x="MES",
+    y="Total de Costo Global",
+    title="Costo mensual (USD)"
+)
 st.plotly_chart(fig2, use_container_width=True)
 
 # ─────────────────────────────
@@ -184,33 +204,33 @@ st.subheader("🏆 Top servicios y especialidades")
 col_a, col_b = st.columns(2)
 
 top_servicios = (
-    df_f["Nombre del Servicio"]
-    .value_counts()
+    df_f.groupby("Nombre del Servicio")["Número Asistencia"]
+    .count()
+    .reset_index(name="Total asistencias")
+    .sort_values("Total asistencias", ascending=False)
     .head(10)
-    .reset_index()
-    .rename(columns={"index": "Servicio", "Nombre del Servicio": "Registros"})
 )
 
 fig_serv = px.bar(
     top_servicios,
-    x="Servicio",
-    y="Registros",
-    title="Top 10 Servicios"
+    x="Nombre del Servicio",
+    y="Total asistencias",
+    title="Top 10 Servicios (por número de asistencias)"
 )
 col_a.plotly_chart(fig_serv, use_container_width=True)
 
-top_esp = (
-    df_f["ESPECIALIDAD MEDICA (CITAS)"]
-    .value_counts()
+top_especialidad = (
+    df_f.groupby("ESPECIALIDAD MEDICA (CITAS)")["Número Asistencia"]
+    .count()
+    .reset_index(name="Total asistencias")
+    .sort_values("Total asistencias", ascending=False)
     .head(10)
-    .reset_index()
-    .rename(columns={"index": "Especialidad", "ESPECIALIDAD MEDICA (CITAS)": "Registros"})
 )
 
 fig_esp = px.bar(
-    top_esp,
-    x="Especialidad",
-    y="Registros",
-    title="Top 10 Especialidades Médicas"
+    top_especialidad,
+    x="ESPECIALIDAD MEDICA (CITAS)",
+    y="Total asistencias",
+    title="Top 10 Especialidades Médicas (por número de asistencias)"
 )
 col_b.plotly_chart(fig_esp, use_container_width=True)
