@@ -126,6 +126,7 @@ df["Fecha creación de asistencia"] = pd.to_datetime(
 
 df["AÑO"] = df["Fecha creación de asistencia"].dt.year
 df["MES"] = df["Fecha creación de asistencia"].dt.month
+st.write("Años detectados:", df["AÑO"].unique())
 for col in ["Total de Costo Global", "Total de importe pagado"]:
     df[col] = (
         df[col]
@@ -135,7 +136,6 @@ for col in ["Total de Costo Global", "Total de importe pagado"]:
         .astype(float)
 
 )
-   st.write("Años detectados:", df["AÑO"].unique())
 
 # ─────────────────────────────
 # FILTROS
