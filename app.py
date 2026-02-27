@@ -121,12 +121,12 @@ df = pd.concat(dfs, ignore_index=True)
 # ─────────────────────────────
 df["Fecha creación de asistencia"] = pd.to_datetime(
     df["Fecha creación de asistencia"],
-    errors="coerce"
+    errors="coerce",
+    dayfirst=True
 )
 
 df["AÑO"] = df["Fecha creación de asistencia"].dt.year
 df["MES"] = df["Fecha creación de asistencia"].dt.month
-st.write("Años detectados:", df["AÑO"].unique())
 for col in ["Total de Costo Global", "Total de importe pagado"]:
     df[col] = (
         df[col]
