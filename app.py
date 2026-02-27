@@ -87,6 +87,8 @@ if uploaded_file:
 # ─────────────────────────────
 dfs = []
 
+st.write("¿Existe histórico?", os.path.exists(f"{DATA_DIR}/historico_2023_2025.csv"))
+
 # Histórico consolidado
 if os.path.exists(f"{DATA_DIR}/historico_2023_2025.csv"):
     df_hist = pd.read_csv(f"{DATA_DIR}/historico_2023_2025.csv", encoding="latin1")
