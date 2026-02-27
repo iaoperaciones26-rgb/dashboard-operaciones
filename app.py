@@ -133,6 +133,8 @@ for col in ["Total de Costo Global", "Total de importe pagado"]:
         .str.replace("$", "", regex=False)
         .str.replace(",", "", regex=False)
         .astype(float)
+
+)
    st.write("Años detectados:", df["AÑO"].unique())
 
 # ─────────────────────────────
