@@ -48,6 +48,31 @@ uploaded_file = st.sidebar.file_uploader(
 
 DATA_DIR = "data"
 os.makedirs(DATA_DIR, exist_ok=True)
+# ─────────────────────────────
+# CARGA HISTÓRICO 2023–2025 (UNA SOLA VEZ)
+# ─────────────────────────────
+st.sidebar.markdown("---")
+st.sidebar.header("📦 Cargar histórico 2023–2025")
+
+uploaded_hist = st.sidebar.file_uploader(
+    "Subir CSV 2023, 2024 y 2025",
+    type="csv",
+    accept_multiple_files=True,
+    key="historico"
+)
+
+if uploaded_hist:
+    dfs_hist = []
+
+    for file in uploaded_hist:
+        df_temp = pd.read_csv(file, encoding="latin1")
+        dfs_hist.append(df_temp)
+
+    df_hist = pd.concat(dfs_hist, ignore_index=True)
+
+    df_hist.to_csv(f"{DATA_DIR}/historico_2023_2025.csv", index=False)
+
+    st.sidebar.success("Histórico consolidado correctamente ✅")
 
 if uploaded_file:
     df_new = pd.read_csv(uploaded_file, encoding="latin1")
@@ -55,23 +80,30 @@ if uploaded_file:
     st.sidebar.success("CSV 2026 actualizado correctamente")
 
 # ─────────────────────────────
-# LECTURA HISTÓRICA
+# LECTURA HISTÓRICO + 2026
 # ─────────────────────────────
-files = [
-    "asistencias_2023.csv",
-    "asistencias_2024.csv",
-    "asistencias_2025.csv",
-    "asistencias_2026.csv"
-]
-
 dfs = []
-for f in files:
-    path = f"{DATA_DIR}/{f}"
-    if os.path.exists(path):
-        temp = pd.read_csv(path, encoding="latin1")
-        temp["AÑO"] = int(f.split("_")[1].replace(".csv", ""))
-        dfs.append(temp)
 
+# Histórico consolidado
+if os.path.exists(f"{DATA_DIR}/historico_2023_2025.csv"):
+    df_hist = pd.read_csv(f"{DATA_DIR}/historico_2023_2025.csv", encoding="latin1")
+    dfs.append(df_hist)
+
+# Año dinámico
+if os.path.exists(f"{DATA_DIR}/asistencias_2026.csv"):
+    df_2026 = pd.read_csv(f"{DATA_DIR}/asistencias_2026.csv", encoding="latin1")
+    dfs.append(df_2026)
+
+if not dfs:
+    st.warning("No hay datos cargados.")
+    st.stop()
+
+df = pd.concat(dfs, ignore_index=True)
+if not dfs:
+    st.warning("No hay datos cargados.")
+    st.stop()
+
+df = pd.concat(dfs, ignore_index=True)
 if not dfs:
     st.warning("No hay datos cargados.")
     st.stop()
@@ -81,13 +113,16 @@ df = pd.concat(dfs, ignore_index=True)
 # ─────────────────────────────
 # FECHAS Y LIMPIEZA
 # ─────────────────────────────
+# ─────────────────────────────
+# FECHAS Y CREACIÓN DE AÑO / MES
+# ─────────────────────────────
 df["Fecha creación de asistencia"] = pd.to_datetime(
     df["Fecha creación de asistencia"],
     errors="coerce"
 )
 
+df["AÑO"] = df["Fecha creación de asistencia"].dt.year
 df["MES"] = df["Fecha creación de asistencia"].dt.month
-
 for col in ["Total de Costo Global", "Total de importe pagado"]:
     df[col] = (
         df[col]
