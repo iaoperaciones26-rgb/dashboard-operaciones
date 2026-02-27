@@ -11,21 +11,22 @@ st.set_page_config(
     layout="wide"
 )
 
-# ─────────────────────────────
-# CONTRASEÑA
-# ─────────────────────────────
+DATA_DIR = "data"
+os.makedirs(DATA_DIR, exist_ok=True)
+
 PASSWORD = "OperacionesGEA"
 
+# ─────────────────────────────
+# FUNCIÓN DE AUTENTICACIÓN
+# ─────────────────────────────
 def check_password():
     if "authenticated" not in st.session_state:
         st.session_state.authenticated = False
 
     if not st.session_state.authenticated:
         st.title("🔐 Acceso restringido")
-        password_input = st.text_input(
-            "Ingrese la contraseña",
-            type="password"
-        )
+        password_input = st.text_input("Ingrese la contraseña", type="password")
+
         if st.button("Ingresar"):
             if password_input == PASSWORD:
                 st.session_state.authenticated = True
@@ -37,36 +38,24 @@ def check_password():
 check_password()
 
 # ─────────────────────────────
-# CARGA CSV 2026 (REEMPLAZO)
+# CARGA DE ARCHIVOS
 # ─────────────────────────────
 st.sidebar.header("📤 Actualizar información 2026")
+uploaded_file = st.sidebar.file_uploader("Subir CSV 2026", type="csv")
 
-uploaded_file = st.sidebar.file_uploader(
-    "Subir CSV 2026",
-    type="csv"
-)
-
-DATA_DIR = "data"
-os.makedirs(DATA_DIR, exist_ok=True)
-# ─────────────────────────────
-# CARGA HISTÓRICO INCREMENTAL 2023–2025
-# ─────────────────────────────
 st.sidebar.markdown("---")
-st.sidebar.header("📦 Cargar histórico 2023–2025 (uno por uno)")
-
+st.sidebar.header("📦 Cargar histórico 2023–2025")
 uploaded_hist = st.sidebar.file_uploader(
-    "Subir un CSV histórico a la vez",
+    "Subir un CSV histórico (uno a la vez)",
     type="csv",
     key="historico"
 )
 
+# Guardar histórico incremental
 if uploaded_hist:
-
     df_temp = pd.read_csv(uploaded_hist, encoding="latin1")
-
     historico_path = f"{DATA_DIR}/historico_2023_2025.csv"
 
-    # Si ya existe histórico, lo abrimos y agregamos
     if os.path.exists(historico_path):
         df_existente = pd.read_csv(historico_path, encoding="latin1")
         df_final = pd.concat([df_existente, df_temp], ignore_index=True)
@@ -74,66 +63,42 @@ if uploaded_hist:
         df_final = df_temp
 
     df_final.to_csv(historico_path, index=False)
-
     st.sidebar.success("Archivo agregado al histórico correctamente ✅")
 
+# Guardar archivo 2026 (reemplazo)
 if uploaded_file:
     df_new = pd.read_csv(uploaded_file, encoding="latin1")
     df_new.to_csv(f"{DATA_DIR}/asistencias_2026.csv", index=False)
-    st.sidebar.success("CSV 2026 actualizado correctamente")
+    st.sidebar.success("CSV 2026 actualizado correctamente ✅")
 
 # ─────────────────────────────
-# LECTURA HISTÓRICO + 2026
+# LECTURA DE DATOS
 # ─────────────────────────────
 dfs = []
 
-st.write("¿Existe histórico?", os.path.exists(f"{DATA_DIR}/historico_2023_2025.csv"))
-
-# Histórico consolidado
 if os.path.exists(f"{DATA_DIR}/historico_2023_2025.csv"):
-    df_hist = pd.read_csv(f"{DATA_DIR}/historico_2023_2025.csv", encoding="latin1")
-    dfs.append(df_hist)
+    dfs.append(pd.read_csv(f"{DATA_DIR}/historico_2023_2025.csv", encoding="latin1"))
 
-# Año dinámico
 if os.path.exists(f"{DATA_DIR}/asistencias_2026.csv"):
-    df_2026 = pd.read_csv(f"{DATA_DIR}/asistencias_2026.csv", encoding="latin1")
-    dfs.append(df_2026)
+    dfs.append(pd.read_csv(f"{DATA_DIR}/asistencias_2026.csv", encoding="latin1"))
 
 if not dfs:
     st.warning("No hay datos cargados.")
     st.stop()
 
 df = pd.concat(dfs, ignore_index=True)
-if not dfs:
-    st.warning("No hay datos cargados.")
-    st.stop()
-
-df = pd.concat(dfs, ignore_index=True)
-if not dfs:
-    st.warning("No hay datos cargados.")
-    st.stop()
-
-df = pd.concat(dfs, ignore_index=True)
 
 # ─────────────────────────────
-# FECHAS Y LIMPIEZA
+# LIMPIEZA Y TRANSFORMACIÓN
 # ─────────────────────────────
-# ─────────────────────────────
-# FECHAS Y CREACIÓN DE AÑO / MES
-# ─────────────────────────────
-df["Fecha creación de asistencia"] = (
-    df["Fecha creación de asistencia"]
-    .astype(str)
-    .str.strip()
-)
-
 df["Fecha creación de asistencia"] = pd.to_datetime(
     df["Fecha creación de asistencia"],
-    format="%d/%m/%Y",
     errors="coerce"
 )
-df["Fecha creación de asistencia"].dt.year
+
+df["AÑO"] = df["Fecha creación de asistencia"].dt.year
 df["MES"] = df["Fecha creación de asistencia"].dt.month
+
 for col in ["Total de Costo Global", "Total de importe pagado"]:
     df[col] = (
         df[col]
@@ -141,8 +106,7 @@ for col in ["Total de Costo Global", "Total de importe pagado"]:
         .str.replace("$", "", regex=False)
         .str.replace(",", "", regex=False)
         .astype(float)
-
-)
+    )
 
 # ─────────────────────────────
 # FILTROS
@@ -155,82 +119,32 @@ def multiselect_filter(label, column):
         sorted(df[column].dropna().unique())
     )
 
-anio = multiselect_filter("Año", "AÑO")
-mes = multiselect_filter("Mes", "MES")
-estado = multiselect_filter("Estado de Asistencia", "Estado de Asistencia")
-canal = multiselect_filter("Canal de Origen", "Canal Origen")
-grupo = multiselect_filter("Grupo de Servicio", "Grupo de Servicio")
-servicio = multiselect_filter("Nombre del Servicio", "Nombre del Servicio")
-subservicio = multiselect_filter("Subservicio", "Nombre del Subservicio")
-especialidad = multiselect_filter("Especialidad Médica", "ESPECIALIDAD MEDICA (CITAS)")
-proveedor = multiselect_filter("Proveedor", "Nombre del Proveedor")
-pais = multiselect_filter("País", "País")
-provincia = multiselect_filter("Provincia", "Provincia")
-ciudad = multiselect_filter("Ciudad", "Ciudad")
-local_foraneo = multiselect_filter("Local / Foráneo", "Local_Foráneo")
-tipo_cliente = multiselect_filter("Tipo de Cliente", "TIPO DE CLIENTE")
-cliente = multiselect_filter("Cliente Institucional", "Cliente Institucional")
-cuenta = multiselect_filter("Nombre de la cuenta", "Nombre de la cuenta")
-plan = multiselect_filter("Nombre del plan", "Nombre del plan")
-evento = multiselect_filter("Tipo de Evento", "Tipo de Evento")
-
-
+filtros = {
+    "AÑO": multiselect_filter("Año", "AÑO"),
+    "MES": multiselect_filter("Mes", "MES"),
+    "Estado de Asistencia": multiselect_filter("Estado de Asistencia", "Estado de Asistencia"),
+    "Canal Origen": multiselect_filter("Canal de Origen", "Canal Origen"),
+    "Grupo de Servicio": multiselect_filter("Grupo de Servicio", "Grupo de Servicio"),
+    "Nombre del Servicio": multiselect_filter("Nombre del Servicio", "Nombre del Servicio"),
+    "Nombre del Subservicio": multiselect_filter("Subservicio", "Nombre del Subservicio"),
+    "ESPECIALIDAD MEDICA (CITAS)": multiselect_filter("Especialidad Médica", "ESPECIALIDAD MEDICA (CITAS)"),
+    "Nombre del Proveedor": multiselect_filter("Proveedor", "Nombre del Proveedor"),
+    "País": multiselect_filter("País", "País"),
+    "Provincia": multiselect_filter("Provincia", "Provincia"),
+    "Ciudad": multiselect_filter("Ciudad", "Ciudad"),
+    "Local_Foráneo": multiselect_filter("Local / Foráneo", "Local_Foráneo"),
+    "TIPO DE CLIENTE": multiselect_filter("Tipo de Cliente", "TIPO DE CLIENTE"),
+    "Cliente Institucional": multiselect_filter("Cliente Institucional", "Cliente Institucional"),
+    "Nombre de la cuenta": multiselect_filter("Nombre de la cuenta", "Nombre de la cuenta"),
+    "Nombre del plan": multiselect_filter("Nombre del plan", "Nombre del plan"),
+    "Tipo de Evento": multiselect_filter("Tipo de Evento", "Tipo de Evento"),
+}
 
 df_f = df.copy()
 
-if anio:
-    df_f = df_f[df_f["AÑO"].isin(anio)]
-
-if mes:
-    df_f = df_f[df_f["MES"].isin(mes)]
-
-if estado:
-    df_f = df_f[df_f["Estado de Asistencia"].isin(estado)]
-
-if canal:
-    df_f = df_f[df_f["Canal Origen"].isin(canal)]
-
-if grupo:
-    df_f = df_f[df_f["Grupo de Servicio"].isin(grupo)]
-
-if servicio:
-    df_f = df_f[df_f["Nombre del Servicio"].isin(servicio)]
-
-if subservicio:
-    df_f = df_f[df_f["Nombre del Subservicio"].isin(subservicio)]
-
-if especialidad:
-    df_f = df_f[df_f["ESPECIALIDAD MEDICA (CITAS)"].isin(especialidad)]
-
-if proveedor:
-    df_f = df_f[df_f["Nombre del Proveedor"].isin(proveedor)]
-
-if pais:
-    df_f = df_f[df_f["País"].isin(pais)]
-    
-if provincia:
-    df_f = df_f[df_f["Provincia"].isin(provincia)]
-
-if ciudad:
-    df_f = df_f[df_f["Ciudad"].isin(ciudad)]
-
-if local_foraneo:
-    df_f = df_f[df_f["Local_Foráneo"].isin(local_foraneo)]
-
-if tipo_cliente:
-    df_f = df_f[df_f["TIPO DE CLIENTE"].isin(tipo_cliente)]
-
-if cliente:
-    df_f = df_f[df_f["Cliente Institucional"].isin(cliente)]
-
-if cuenta:
-    df_f = df_f[df_f["Nombre de la cuenta"].isin(cuenta)]
-
-if plan:
-    df_f = df_f[df_f["Nombre del plan"].isin(plan)]
-
-if evento:
-    df_f = df_f[df_f["Tipo de Evento"].isin(evento)]
+for columna, valores in filtros.items():
+    if valores:
+        df_f = df_f[df_f[columna].isin(valores)]
 
 # ─────────────────────────────
 # KPIs
@@ -247,7 +161,7 @@ col2.metric("💲 Costo total", f"${costo_total:,.2f}")
 col3.metric("💲 Costo promedio", f"${costo_promedio:,.2f}")
 
 # ─────────────────────────────
-# GRÁFICOS DE TENDENCIA
+# TENDENCIAS
 # ─────────────────────────────
 st.subheader("📈 Tendencias")
 
@@ -282,9 +196,7 @@ st.plotly_chart(fig2, use_container_width=True)
 # ─────────────────────────────
 # TOPS
 # ─────────────────────────────
-st.subheader("🏆 Top servicios y especialidades")
-
-col_a, col_b = st.columns(2)
+st.subheader("🏆 Top 10 Servicios")
 
 top_servicios = (
     df_f.groupby("Nombre del Servicio")["Número Asistencia"]
@@ -298,55 +210,28 @@ fig_serv = px.bar(
     top_servicios,
     x="Nombre del Servicio",
     y="Total asistencias",
-    title="Top 10 Servicios (por número de asistencias)"
-)
-col_a.plotly_chart(fig_serv, use_container_width=True)
-
-top_especialidad = (
-    df_f.groupby("ESPECIALIDAD MEDICA (CITAS)")["Número Asistencia"]
-    .count()
-    .reset_index(name="Total asistencias")
-    .sort_values("Total asistencias", ascending=False)
-    .head(10)
+    title="Top 10 Servicios"
 )
 
-fig_esp = px.bar(
-    top_especialidad,
-    x="ESPECIALIDAD MEDICA (CITAS)",
-    y="Total asistencias",
-    title="Top 10 Especialidades Médicas (por número de asistencias)"
-)
-col_b.plotly_chart(fig_esp, use_container_width=True)
+st.plotly_chart(fig_serv, use_container_width=True)
 
 # ─────────────────────────────
-# ESTADO DE ASISTENCIA POR MES (TABLA ORDENADA)
+# ESTADO DE ASISTENCIA
 # ─────────────────────────────
 st.subheader("📋 Estado de Asistencia por Mes")
 
 tabla_estado = (
-    df_f
-    .groupby(["Estado de Asistencia", "MES"])["Número Asistencia"]
+    df_f.groupby(["Estado de Asistencia", "MES"])["Número Asistencia"]
     .count()
     .reset_index()
-    .pivot(
-        index="Estado de Asistencia",
-        columns="MES",
-        values="Número Asistencia"
-    )
+    .pivot(index="Estado de Asistencia", columns="MES", values="Número Asistencia")
     .fillna(0)
     .astype(int)
 )
 
-# Agregar total por fila
 tabla_estado["Total general"] = tabla_estado.sum(axis=1)
+tabla_estado = tabla_estado.sort_values(by="Total general", ascending=False)
 
-# Ordenar de mayor a menor por total
-tabla_estado = tabla_estado.sort_values(
-    by="Total general",
-    ascending=False
-)
-
-# Agregar fila Total general al final
 total_fila = tabla_estado.sum().to_frame().T
 total_fila.index = ["Total general"]
 
@@ -355,13 +240,12 @@ tabla_estado = pd.concat([tabla_estado, total_fila])
 st.dataframe(tabla_estado, use_container_width=True)
 
 # ─────────────────────────────
-# GRÁFICO PASTEL ESTADO DE ASISTENCIA (ORDENADO)
+# PIE ESTADO
 # ─────────────────────────────
 st.subheader("🥧 % Estado de Asistencia")
 
 estado_totales = (
-    df_f
-    .groupby("Estado de Asistencia")["Número Asistencia"]
+    df_f.groupby("Estado de Asistencia")["Número Asistencia"]
     .count()
     .reset_index()
     .sort_values(by="Número Asistencia", ascending=False)
@@ -371,7 +255,6 @@ fig_pie = px.pie(
     estado_totales,
     names="Estado de Asistencia",
     values="Número Asistencia",
-    title="% Estado de Asistencia",
     hole=0.4
 )
 
