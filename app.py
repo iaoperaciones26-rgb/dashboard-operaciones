@@ -102,6 +102,9 @@ if not dfs:
 
 df = pd.concat(dfs, ignore_index=True)
 
+# Limpieza de nombres de columnas
+df.columns = df.columns.str.strip()
+
 # ─────────────────────────────
 # FECHAS Y LIMPIEZA
 # ─────────────────────────────
