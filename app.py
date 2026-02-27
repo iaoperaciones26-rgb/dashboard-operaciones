@@ -121,10 +121,16 @@ df = pd.concat(dfs, ignore_index=True)
 # ─────────────────────────────
 # FECHAS Y CREACIÓN DE AÑO / MES
 # ─────────────────────────────
+df["Fecha creación de asistencia"] = (
+    df["Fecha creación de asistencia"]
+    .astype(str)
+    .str.strip()
+)
+
 df["Fecha creación de asistencia"] = pd.to_datetime(
     df["Fecha creación de asistencia"],
-    errors="coerce",
-    dayfirst=True
+    format="%d/%m/%Y",
+    errors="coerce"
 )
 
 df["AÑO"] = df["Fecha creación de asistencia"].dt.year
