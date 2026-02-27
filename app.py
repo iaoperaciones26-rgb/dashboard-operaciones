@@ -49,30 +49,33 @@ uploaded_file = st.sidebar.file_uploader(
 DATA_DIR = "data"
 os.makedirs(DATA_DIR, exist_ok=True)
 # ─────────────────────────────
-# CARGA HISTÓRICO 2023–2025 (UNA SOLA VEZ)
+# CARGA HISTÓRICO INCREMENTAL 2023–2025
 # ─────────────────────────────
 st.sidebar.markdown("---")
-st.sidebar.header("📦 Cargar histórico 2023–2025")
+st.sidebar.header("📦 Cargar histórico 2023–2025 (uno por uno)")
 
 uploaded_hist = st.sidebar.file_uploader(
-    "Subir CSV 2023, 2024 y 2025",
+    "Subir un CSV histórico a la vez",
     type="csv",
-    accept_multiple_files=True,
     key="historico"
 )
 
 if uploaded_hist:
-    dfs_hist = []
 
-    for file in uploaded_hist:
-        df_temp = pd.read_csv(file, encoding="latin1")
-        dfs_hist.append(df_temp)
+    df_temp = pd.read_csv(uploaded_hist, encoding="latin1")
 
-    df_hist = pd.concat(dfs_hist, ignore_index=True)
+    historico_path = f"{DATA_DIR}/historico_2023_2025.csv"
 
-    df_hist.to_csv(f"{DATA_DIR}/historico_2023_2025.csv", index=False)
+    # Si ya existe histórico, lo abrimos y agregamos
+    if os.path.exists(historico_path):
+        df_existente = pd.read_csv(historico_path, encoding="latin1")
+        df_final = pd.concat([df_existente, df_temp], ignore_index=True)
+    else:
+        df_final = df_temp
 
-    st.sidebar.success("Histórico consolidado correctamente ✅")
+    df_final.to_csv(historico_path, index=False)
+
+    st.sidebar.success("Archivo agregado al histórico correctamente ✅")
 
 if uploaded_file:
     df_new = pd.read_csv(uploaded_file, encoding="latin1")
