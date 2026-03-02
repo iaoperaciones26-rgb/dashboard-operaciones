@@ -78,7 +78,6 @@ if uploaded_hist:
 # ─────────────────────────────
 if st.session_state.role == "admin":
     st.sidebar.header("📤 Actualizar información 2026")
-
     uploaded_file = st.sidebar.file_uploader(
         "Subir CSV 2026",
         type="csv"
