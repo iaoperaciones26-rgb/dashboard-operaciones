@@ -12,33 +12,23 @@ st.set_page_config(
 )
 
 # ─────────────────────────────
-# SISTEMA DE ROLES
+# CONTRASEÑA
 # ─────────────────────────────
-
-ADMIN_PASSWORD = "OperacionesGEA_ADMIN"
-VIEW_PASSWORD = "OperacionesGEA"
+PASSWORD = "OperacionesGEA"
 
 def check_password():
-    if "role" not in st.session_state:
-        st.session_state.role = None
+    if "authenticated" not in st.session_state:
+        st.session_state.authenticated = False
 
-    if st.session_state.role is None:
+    if not st.session_state.authenticated:
         st.title("🔐 Acceso restringido")
-        password_input = st.text_input(
-            "Ingrese la contraseña",
-            type="password"
-        )
-
+        password_input = st.text_input("Ingrese la contraseña", type="password")
         if st.button("Ingresar"):
-            if password_input == ADMIN_PASSWORD:
-                st.session_state.role = "admin"
-                st.rerun()
-            elif password_input == VIEW_PASSWORD:
-                st.session_state.role = "viewer"
+            if password_input == PASSWORD:
+                st.session_state.authenticated = True
                 st.rerun()
             else:
                 st.error("Contraseña incorrecta")
-
         st.stop()
 
 check_password()
@@ -76,17 +66,14 @@ if uploaded_hist:
 # ─────────────────────────────
 # CARGA 2026
 # ─────────────────────────────
-if st.session_state.role == "admin":
-    st.sidebar.header("📤 Actualizar información 2026")
-    uploaded_file = st.sidebar.file_uploader(
-        "Subir CSV 2026",
-        type="csv"
-    )
+st.sidebar.markdown("---")
+st.sidebar.header("📤 Actualizar información 2026")
 
-    if uploaded_file:
-        df_new = pd.read_csv(uploaded_file, encoding="latin1")
-        df_new.to_csv(f"{DATA_DIR}/asistencias_2026.csv", index=False)
-        st.sidebar.success("CSV 2026 actualizado correctamente")
+uploaded_2026 = st.sidebar.file_uploader(
+    "Subir CSV 2026",
+    type="csv",
+    key="anio2026"
+)
 
 if uploaded_2026:
     df_2026_new = pd.read_csv(uploaded_2026, encoding="latin1")
