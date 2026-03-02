@@ -12,23 +12,33 @@ st.set_page_config(
 )
 
 # ─────────────────────────────
-# CONTRASEÑA
+# SISTEMA DE ROLES
 # ─────────────────────────────
-PASSWORD = "OperacionesGEA"
+
+ADMIN_PASSWORD = "OperacionesGEA_ADMIN"
+VIEW_PASSWORD = "OperacionesGEA"
 
 def check_password():
-    if "authenticated" not in st.session_state:
-        st.session_state.authenticated = False
+    if "role" not in st.session_state:
+        st.session_state.role = None
 
-    if not st.session_state.authenticated:
+    if st.session_state.role is None:
         st.title("🔐 Acceso restringido")
-        password_input = st.text_input("Ingrese la contraseña", type="password")
+        password_input = st.text_input(
+            "Ingrese la contraseña",
+            type="password"
+        )
+
         if st.button("Ingresar"):
-            if password_input == PASSWORD:
-                st.session_state.authenticated = True
+            if password_input == ADMIN_PASSWORD:
+                st.session_state.role = "admin"
+                st.rerun()
+            elif password_input == VIEW_PASSWORD:
+                st.session_state.role = "viewer"
                 st.rerun()
             else:
                 st.error("Contraseña incorrecta")
+
         st.stop()
 
 check_password()
