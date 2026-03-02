@@ -224,18 +224,55 @@ if plan: df_f = df_f[df_f["Nombre del plan"].isin(plan)]
 if evento: df_f = df_f[df_f["Tipo de Evento"].isin(evento)]
 
 # ─────────────────────────────
-# KPIs
+# KPIs DINÁMICOS POR AÑO
 # ─────────────────────────────
 st.title("📊 Dashboard Operaciones GEA")
 
-total_asistencias = df_f["Número Asistencia"].nunique()
-costo_total = df_f["Total de Costo Global"].sum()
-costo_promedio = costo_total / total_asistencias if total_asistencias > 0 else 0
+# Si NO hay filtro de año → mostrar resumen por año
+if not anio:
 
-col1, col2, col3 = st.columns(3)
-col1.metric("🔢 Total asistencias", f"{total_asistencias:,}")
-col2.metric("💲 Costo total", f"${costo_total:,.2f}")
-col3.metric("💲 Costo promedio", f"${costo_promedio:,.2f}")
+    resumen_anual = (
+        df.groupby("AÑO")
+        .agg(
+            Total_asistencias=("Número Asistencia", "nunique"),
+            Costo_total=("Total de Costo Global", "sum")
+        )
+        .reset_index()
+        .sort_values("AÑO")
+    )
+
+    # Mostrar métricas por año
+    cols = st.columns(len(resumen_anual))
+
+    for i, row in resumen_anual.iterrows():
+        with cols[i]:
+            st.metric(
+                label=f"{int(row['AÑO'])} - Total asistencias",
+                value=f"{int(row['Total_asistencias']):,}"
+            )
+            st.caption(f"Costo total: ${row['Costo_total']:,.2f}")
+
+    st.markdown("---")
+
+    # Total general
+    total_general_asist = resumen_anual["Total_asistencias"].sum()
+    total_general_costo = resumen_anual["Costo_total"].sum()
+
+    col1, col2 = st.columns(2)
+    col1.metric("TOTAL GENERAL Asistencias", f"{int(total_general_asist):,}")
+    col2.metric("TOTAL GENERAL Costo", f"${total_general_costo:,.2f}")
+
+# Si hay filtro aplicado → mostrar normal
+else:
+
+    total_asistencias = df_f["Número Asistencia"].nunique()
+    costo_total = df_f["Total de Costo Global"].sum()
+    costo_promedio = costo_total / total_asistencias if total_asistencias > 0 else 0
+
+    col1, col2, col3 = st.columns(3)
+    col1.metric("Total asistencias", f"{total_asistencias:,}")
+    col2.metric("Costo total", f"${costo_total:,.2f}")
+    col3.metric("Costo promedio", f"${costo_promedio:,.2f}")
 # ─────────────────────────────
 # TENDENCIAS
 # ─────────────────────────────
