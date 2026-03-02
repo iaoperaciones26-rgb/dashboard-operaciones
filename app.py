@@ -166,21 +166,23 @@ if mes:
     df_f = df_f[df_f["MES"].isin(mes)]
 
 # ─────────────────────────────
-# KPIs
+# KPIs CORREGIDOS
 # ─────────────────────────────
 st.title("📊 Dashboard Operaciones GEA")
 
-total = df_f["Número Asistencia"].count()
-costo_total = df_f["Total de Costo Global"].sum() if "Total de Costo Global" in df_f.columns else 0
+if "Número Asistencia" in df_f.columns:
+    total = df_f["Número Asistencia"].nunique()
+else:
+    total = len(df_f)
+
+if "Total de Costo Global" in df_f.columns:
+    costo_total = df_f["Total de Costo Global"].sum()
+else:
+    costo_total = 0
+
 promedio = costo_total / total if total > 0 else 0
 
 c1, c2, c3 = st.columns(3)
 c1.metric("Total asistencias", f"{total:,}")
 c2.metric("Costo total", f"${costo_total:,.2f}")
 c3.metric("Costo promedio", f"${promedio:,.2f}")
-
-# Tendencia mensual
-st.subheader("Tendencia mensual")
-trend = df_f.groupby("MES")["Número Asistencia"].count().reset_index()
-fig = px.line(trend, x="MES", y="Número Asistencia")
-st.plotly_chart(fig, use_container_width=True)
