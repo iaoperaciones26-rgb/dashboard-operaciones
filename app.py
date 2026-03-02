@@ -32,52 +32,34 @@ def check_password():
                 st.session_state.authenticated = True
                 st.session_state.role = "viewer"
                 st.rerun()
-
             elif password_input == ADMIN_PASSWORD:
                 st.session_state.authenticated = True
                 st.session_state.role = "admin"
                 st.rerun()
-
             else:
                 st.error("Contraseña incorrecta")
-
         st.stop()
 
 check_password()
 
-# ─────────────────────────────
-# DIRECTORIO DATA
-# ─────────────────────────────
 DATA_DIR = "data"
 os.makedirs(DATA_DIR, exist_ok=True)
 
 # ─────────────────────────────
-# SOLO ACTUALIZAR 2026 (ADMIN)
+# ADMIN SOLO ACTUALIZA 2026
 # ─────────────────────────────
 if st.session_state.role == "admin":
-
     st.sidebar.markdown("## 👑 Panel Administrador")
-    st.sidebar.success("Perfil: Administrador")
-
-    st.sidebar.header("📤 Actualizar información 2026")
-
-    uploaded_2026 = st.sidebar.file_uploader(
-        "Subir CSV 2026",
-        type="csv",
-        key="anio2026"
-    )
-
+    uploaded_2026 = st.sidebar.file_uploader("Subir CSV 2026", type="csv")
     if uploaded_2026:
         df_2026_new = pd.read_csv(uploaded_2026, encoding="latin1")
         df_2026_new.to_csv(f"{DATA_DIR}/asistencias_2026.csv", index=False)
-        st.sidebar.success("CSV 2026 actualizado correctamente")
-
+        st.sidebar.success("2026 actualizado correctamente")
 else:
-    st.sidebar.markdown("## 🔎 Perfil Visualización")
     st.sidebar.info("Modo solo lectura")
 
 # ─────────────────────────────
-# CARGA DE DATOS (DRIVE + LOCAL)
+# CARGA DATOS DESDE DRIVE + LOCAL
 # ─────────────────────────────
 @st.cache_data(show_spinner=True)
 def cargar_datos():
@@ -91,84 +73,52 @@ def cargar_datos():
     }
 
     for year, file_id in files.items():
-        try:
-            url = f"https://drive.google.com/uc?id={file_id}"
-            output = f"/tmp/{year}.csv"
+        url = f"https://drive.google.com/uc?id={file_id}"
+        output = f"/tmp/{year}.csv"
+        if not os.path.exists(output):
+            gdown.download(url, output, quiet=True)
+        dfs.append(pd.read_csv(output, encoding="latin1"))
 
-            if not os.path.exists(output):
-                gdown.download(url, output, quiet=True)
-
-            dfs.append(pd.read_csv(output, encoding="latin1"))
-
-        except Exception as e:
-            st.warning(f"No se pudo cargar {year}: {e}")
-
-    # 2026 local
     path_2026 = f"{DATA_DIR}/asistencias_2026.csv"
     if os.path.exists(path_2026):
         dfs.append(pd.read_csv(path_2026, encoding="latin1"))
 
-    if not dfs:
-        return None
-
     df = pd.concat(dfs, ignore_index=True)
-
-    df.columns = (
-        df.columns
-        .str.replace('\ufeff', '', regex=False)
-        .str.strip()
-    )
+    df.columns = df.columns.str.replace('\ufeff', '', regex=False).str.strip()
 
     return df
 
 df = cargar_datos()
-
-# ─────────────────────────────
-# DIAGNÓSTICO
-# ─────────────────────────────
-if df is not None:
-    st.write("Total registros cargados:", len(df))
 
 if df is None:
     st.warning("No hay datos cargados.")
     st.stop()
 
 # ─────────────────────────────
-# VALIDACIÓN COLUMNA FECHA
+# PROCESAMIENTO FECHA
 # ─────────────────────────────
-fecha_col = None
-for col in df.columns:
-    if "fecha" in col.lower() and "asistencia" in col.lower():
-        fecha_col = col
-        break
-
-if fecha_col is None:
-    st.error("❌ No se encontró la columna de fecha")
-    st.write(df.columns.tolist())
-    st.stop()
-
-# ─────────────────────────────
-# PROCESAMIENTO FECHAS
-# ─────────────────────────────
+fecha_col = [c for c in df.columns if "fecha" in c.lower() and "asistencia" in c.lower()][0]
 df[fecha_col] = pd.to_datetime(df[fecha_col], errors="coerce")
 df = df.dropna(subset=[fecha_col])
 
-df["AÑO"] = df[fecha_col].dt.year.astype(int)
-df["MES"] = df[fecha_col].dt.month.astype(int)
-
-st.write("Años detectados:", sorted(df["AÑO"].unique()))
+df["AÑO"] = df[fecha_col].dt.year
+df["MES"] = df[fecha_col].dt.month
 
 # ─────────────────────────────
-# LIMPIEZA MONETARIA
+# LIMPIAR NÚMERO ASISTENCIA
 # ─────────────────────────────
-if "Total de Costo Global" in df.columns:
-    df["Total de Costo Global"] = (
-        df["Total de Costo Global"]
-        .astype(str)
-        .str.replace("$", "", regex=False)
-        .str.replace(",", "", regex=False)
-        .astype(float)
-    )
+df["Número Asistencia"] = df["Número Asistencia"].astype(str).str.strip()
+
+# ─────────────────────────────
+# LIMPIEZA MONTO
+# ─────────────────────────────
+df["Total de Costo Global"] = (
+    df["Total de Costo Global"]
+    .astype(str)
+    .str.replace("$", "", regex=False)
+    .str.replace(",", "", regex=False)
+    .astype(float)
+)
 
 # ─────────────────────────────
 # FILTROS COMPLETOS
@@ -224,11 +174,10 @@ if plan: df_f = df_f[df_f["Nombre del plan"].isin(plan)]
 if evento: df_f = df_f[df_f["Tipo de Evento"].isin(evento)]
 
 # ─────────────────────────────
-# KPIs CORRECTOS (COUNT REAL)
+# KPIs CORRECTOS
 # ─────────────────────────────
 st.title("📊 Dashboard Operaciones GEA")
 
-# Detectar si hay filtros activos
 filtros_activos = any([
     anio, mes, estado, canal, grupo, servicio,
     subservicio, especialidad, proveedor, pais,
@@ -236,22 +185,17 @@ filtros_activos = any([
     tipo_cliente, cliente, cuenta, plan, evento
 ])
 
-# Si no hay filtros → usar total general
-if not filtros_activos:
-    df_kpi = df
-else:
-    df_kpi = df_f
+df_kpi = df_f if filtros_activos else df
 
-# 👇 AQUÍ ESTÁ EL CAMBIO IMPORTANTE
 total_asistencias = df_kpi["Número Asistencia"].count()
-
 costo_total = df_kpi["Total de Costo Global"].sum()
 costo_promedio = costo_total / total_asistencias if total_asistencias > 0 else 0
 
 col1, col2, col3 = st.columns(3)
-col1.metric("🔢 Total asistencias", f"{total_asistencias:,}")
-col2.metric("💲 Costo total", f"${costo_total:,.2f}")
-col3.metric("💲 Costo promedio", f"${costo_promedio:,.2f}")
+col1.metric("Total asistencias", f"{total_asistencias:,}")
+col2.metric("Costo total", f"${costo_total:,.2f}")
+col3.metric("Costo promedio", f"${costo_promedio:,.2f}")
+
 # ─────────────────────────────
 # TENDENCIAS
 # ─────────────────────────────
@@ -263,14 +207,7 @@ asist_mes = (
     .reset_index(name="Total asistencias")
 )
 
-fig1 = px.line(
-    asist_mes,
-    x="MES",
-    y="Total asistencias",
-    color="AÑO",
-    title="Asistencias por mes"
-)
-
+fig1 = px.line(asist_mes, x="MES", y="Total asistencias", color="AÑO")
 st.plotly_chart(fig1, use_container_width=True)
 
 costo_mes = (
@@ -279,18 +216,11 @@ costo_mes = (
     .reset_index()
 )
 
-fig2 = px.line(
-    costo_mes,
-    x="MES",
-    y="Total de Costo Global",
-    color="AÑO",
-    title="Costo mensual"
-)
-
+fig2 = px.line(costo_mes, x="MES", y="Total de Costo Global", color="AÑO")
 st.plotly_chart(fig2, use_container_width=True)
 
 # ─────────────────────────────
-# TOP SERVICIOS Y ESPECIALIDADES
+# TOPS
 # ─────────────────────────────
 st.subheader("🏆 Top servicios y especialidades")
 
@@ -304,12 +234,7 @@ top_servicios = (
     .head(10)
 )
 
-fig_serv = px.bar(
-    top_servicios,
-    x="Nombre del Servicio",
-    y="Total asistencias"
-)
-
+fig_serv = px.bar(top_servicios, x="Nombre del Servicio", y="Total asistencias")
 col_a.plotly_chart(fig_serv, use_container_width=True)
 
 top_especialidad = (
@@ -320,12 +245,7 @@ top_especialidad = (
     .head(10)
 )
 
-fig_esp = px.bar(
-    top_especialidad,
-    x="ESPECIALIDAD MEDICA (CITAS)",
-    y="Total asistencias"
-)
-
+fig_esp = px.bar(top_especialidad, x="ESPECIALIDAD MEDICA (CITAS)", y="Total asistencias")
 col_b.plotly_chart(fig_esp, use_container_width=True)
 
 # ─────────────────────────────
@@ -343,17 +263,10 @@ tabla_estado = (
 )
 
 tabla_estado["Total general"] = tabla_estado.sum(axis=1)
-tabla_estado = tabla_estado.sort_values("Total general", ascending=False)
-
-total_fila = tabla_estado.sum().to_frame().T
-total_fila.index = ["Total general"]
-
-tabla_estado = pd.concat([tabla_estado, total_fila])
-
 st.dataframe(tabla_estado, use_container_width=True)
 
 # ─────────────────────────────
-# PIE ESTADO
+# PIE
 # ─────────────────────────────
 st.subheader("🥧 % Estado de Asistencia")
 
@@ -361,14 +274,7 @@ estado_totales = (
     df_f.groupby("Estado de Asistencia")["Número Asistencia"]
     .count()
     .reset_index()
-    .sort_values("Número Asistencia", ascending=False)
 )
 
-fig_pie = px.pie(
-    estado_totales,
-    names="Estado de Asistencia",
-    values="Número Asistencia",
-    hole=0.4
-)
-
+fig_pie = px.pie(estado_totales, names="Estado de Asistencia", values="Número Asistencia", hole=0.4)
 st.plotly_chart(fig_pie, use_container_width=True)
