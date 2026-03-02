@@ -76,14 +76,18 @@ if uploaded_hist:
 # ─────────────────────────────
 # CARGA 2026
 # ─────────────────────────────
-st.sidebar.markdown("---")
-st.sidebar.header("📤 Actualizar información 2026")
+if st.session_state.role == "admin":
+    st.sidebar.header("📤 Actualizar información 2026")
 
-uploaded_2026 = st.sidebar.file_uploader(
-    "Subir CSV 2026",
-    type="csv",
-    key="anio2026"
-)
+    uploaded_file = st.sidebar.file_uploader(
+        "Subir CSV 2026",
+        type="csv"
+    )
+
+    if uploaded_file:
+        df_new = pd.read_csv(uploaded_file, encoding="latin1")
+        df_new.to_csv(f"{DATA_DIR}/asistencias_2026.csv", index=False)
+        st.sidebar.success("CSV 2026 actualizado correctamente")
 
 if uploaded_2026:
     df_2026_new = pd.read_csv(uploaded_2026, encoding="latin1")
