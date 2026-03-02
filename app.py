@@ -236,3 +236,123 @@ col1, col2, col3 = st.columns(3)
 col1.metric("🔢 Total asistencias", f"{total_asistencias:,}")
 col2.metric("💲 Costo total", f"${costo_total:,.2f}")
 col3.metric("💲 Costo promedio", f"${costo_promedio:,.2f}")
+# ─────────────────────────────
+# TENDENCIAS
+# ─────────────────────────────
+st.subheader("📈 Tendencias")
+
+asist_mes = (
+    df_f.groupby(["AÑO", "MES"])["Número Asistencia"]
+    .count()
+    .reset_index(name="Total asistencias")
+)
+
+fig1 = px.line(
+    asist_mes,
+    x="MES",
+    y="Total asistencias",
+    color="AÑO",
+    title="Asistencias por mes"
+)
+
+st.plotly_chart(fig1, use_container_width=True)
+
+costo_mes = (
+    df_f.groupby(["AÑO", "MES"])["Total de Costo Global"]
+    .sum()
+    .reset_index()
+)
+
+fig2 = px.line(
+    costo_mes,
+    x="MES",
+    y="Total de Costo Global",
+    color="AÑO",
+    title="Costo mensual"
+)
+
+st.plotly_chart(fig2, use_container_width=True)
+
+# ─────────────────────────────
+# TOP SERVICIOS Y ESPECIALIDADES
+# ─────────────────────────────
+st.subheader("🏆 Top servicios y especialidades")
+
+col_a, col_b = st.columns(2)
+
+top_servicios = (
+    df_f.groupby("Nombre del Servicio")["Número Asistencia"]
+    .count()
+    .reset_index(name="Total asistencias")
+    .sort_values("Total asistencias", ascending=False)
+    .head(10)
+)
+
+fig_serv = px.bar(
+    top_servicios,
+    x="Nombre del Servicio",
+    y="Total asistencias"
+)
+
+col_a.plotly_chart(fig_serv, use_container_width=True)
+
+top_especialidad = (
+    df_f.groupby("ESPECIALIDAD MEDICA (CITAS)")["Número Asistencia"]
+    .count()
+    .reset_index(name="Total asistencias")
+    .sort_values("Total asistencias", ascending=False)
+    .head(10)
+)
+
+fig_esp = px.bar(
+    top_especialidad,
+    x="ESPECIALIDAD MEDICA (CITAS)",
+    y="Total asistencias"
+)
+
+col_b.plotly_chart(fig_esp, use_container_width=True)
+
+# ─────────────────────────────
+# TABLA ESTADO POR MES
+# ─────────────────────────────
+st.subheader("📋 Estado de Asistencia por Mes")
+
+tabla_estado = (
+    df_f.groupby(["Estado de Asistencia", "MES"])["Número Asistencia"]
+    .count()
+    .reset_index()
+    .pivot(index="Estado de Asistencia", columns="MES", values="Número Asistencia")
+    .fillna(0)
+    .astype(int)
+)
+
+tabla_estado["Total general"] = tabla_estado.sum(axis=1)
+tabla_estado = tabla_estado.sort_values("Total general", ascending=False)
+
+total_fila = tabla_estado.sum().to_frame().T
+total_fila.index = ["Total general"]
+
+tabla_estado = pd.concat([tabla_estado, total_fila])
+
+st.dataframe(tabla_estado, use_container_width=True)
+
+# ─────────────────────────────
+# PIE ESTADO
+# ─────────────────────────────
+st.subheader("🥧 % Estado de Asistencia")
+
+estado_totales = (
+    df_f.groupby("Estado de Asistencia")["Número Asistencia"]
+    .count()
+    .reset_index()
+    .sort_values("Número Asistencia", ascending=False)
+)
+
+fig_pie = px.pie(
+    estado_totales,
+    names="Estado de Asistencia",
+    values="Número Asistencia",
+    hole=0.4
+)
+
+st.plotly_chart(fig_pie, use_container_width=True)
