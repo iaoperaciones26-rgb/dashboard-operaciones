@@ -123,16 +123,27 @@ df = pd.concat(dfs, ignore_index=True)
 df.columns = df.columns.str.strip()
 
 # ─────────────────────────────
-# VALIDACIÓN COLUMNA FECHA
+# LIMPIEZA DE NOMBRES DE COLUMNAS
 # ─────────────────────────────
-fecha_col = "Fecha creación de asistencia"
+df.columns = (
+    df.columns
+    .str.replace('\ufeff', '', regex=False)
+    .str.strip()
+)
 
-if fecha_col not in df.columns:
-    st.error("❌ No se encontró la columna 'Fecha creación de asistencia'")
+# Buscar columna fecha sin depender exacto del nombre
+fecha_col = None
+
+for col in df.columns:
+    if "fecha" in col.lower() and "asistencia" in col.lower():
+        fecha_col = col
+        break
+
+if fecha_col is None:
+    st.error("❌ No se encontró una columna de fecha válida.")
     st.write("Columnas detectadas:")
     st.write(df.columns.tolist())
     st.stop()
-
 # ─────────────────────────────
 # PROCESAMIENTO FECHAS
 # ─────────────────────────────
