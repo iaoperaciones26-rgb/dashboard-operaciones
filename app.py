@@ -68,26 +68,34 @@ else:
 # ─────────────────────────────
 # CARGA DE DATOS (Drive + Local)
 # ─────────────────────────────
+import gdown
+
 @st.cache_data(show_spinner=True)
 def cargar_datos():
 
     dfs = []
 
-    # HISTÓRICO DESDE DRIVE
-    urls = [
-        "https://drive.google.com/uc?export=download&id=1jVvFPdg5A5ySOQtKeuO1pLU6zG2cTa51",
-        "https://drive.google.com/uc?export=download&id=1YnRJtc6_NyXmXjmOMLP8oINOmqr7e3_I",
-        "https://drive.google.com/uc?export=download&id=1_etz-VsH66PpmnHVEo2H-wVgwkd4DKMl"
-    ]
+    files = {
+        "2023": "1jVvFPdg5A5ySOQtKeuO1pLU6zG2cTa51",
+        "2024": "1YnRJtc6_NyXmXjmOMLP8oINOmqr7e3_I",
+        "2025": "1_etz-VsH66PpmnHVEo2H-wVgwkd4DKMl"
+    }
 
-    for url in urls:
+    for year, file_id in files.items():
         try:
-            dfs.append(pd.read_csv(url, encoding="latin1"))
-        except:
-            pass
+            url = f"https://drive.google.com/uc?id={file_id}"
+            output = f"/tmp/{year}.csv"
 
-    # 2026 LOCAL
-    path_2026 = f"{DATA_DIR}/asistencias_2026.csv"
+            if not os.path.exists(output):
+                gdown.download(url, output, quiet=True)
+
+            dfs.append(pd.read_csv(output, encoding="latin1"))
+
+        except Exception as e:
+            st.warning(f"No se pudo cargar {year}: {e}")
+
+    # 2026 local
+    path_2026 = "data/asistencias_2026.csv"
     if os.path.exists(path_2026):
         dfs.append(pd.read_csv(path_2026, encoding="latin1"))
 
@@ -96,7 +104,6 @@ def cargar_datos():
 
     df = pd.concat(dfs, ignore_index=True)
 
-    # Limpieza columnas
     df.columns = (
         df.columns
         .str.replace('\ufeff', '', regex=False)
@@ -104,8 +111,10 @@ def cargar_datos():
     )
 
     return df
-
 df = cargar_datos()
+
+st.write("Total registros cargados:", len(df))
+st.write("Años detectados:", df["AÑO"].unique() if "AÑO" in df.columns else "AÑO no creado")
 
 if df is None:
     st.warning("No hay datos disponibles.")
