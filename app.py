@@ -12,23 +12,34 @@ st.set_page_config(
 )
 
 # ─────────────────────────────
-# CONTRASEÑA
+# CONTRASEÑAS Y ROLES
 # ─────────────────────────────
-PASSWORD = "OperacionesGEA"
+VIEW_PASSWORD = "OperacionesGEA"
+ADMIN_PASSWORD = "OperacionesGEA_admin"
 
 def check_password():
     if "authenticated" not in st.session_state:
         st.session_state.authenticated = False
+        st.session_state.role = None
 
     if not st.session_state.authenticated:
         st.title("🔐 Acceso restringido")
         password_input = st.text_input("Ingrese la contraseña", type="password")
+
         if st.button("Ingresar"):
-            if password_input == PASSWORD:
+            if password_input == VIEW_PASSWORD:
                 st.session_state.authenticated = True
+                st.session_state.role = "viewer"
                 st.rerun()
+
+            elif password_input == ADMIN_PASSWORD:
+                st.session_state.authenticated = True
+                st.session_state.role = "admin"
+                st.rerun()
+
             else:
                 st.error("Contraseña incorrecta")
+
         st.stop()
 
 check_password()
@@ -40,45 +51,57 @@ DATA_DIR = "data"
 os.makedirs(DATA_DIR, exist_ok=True)
 
 # ─────────────────────────────
-# CARGA HISTÓRICO 2023–2025
+# OPCIONES SOLO ADMIN
 # ─────────────────────────────
-st.sidebar.header("📦 Cargar histórico 2023–2025 (uno por uno)")
+if st.session_state.role == "admin":
 
-uploaded_hist = st.sidebar.file_uploader(
-    "Subir un CSV histórico a la vez",
-    type="csv",
-    key="historico"
-)
+    st.sidebar.markdown("## 👑 Panel Administrador")
+    st.sidebar.success("Perfil: Administrador")
 
-if uploaded_hist:
-    df_temp = pd.read_csv(uploaded_hist, encoding="latin1")
-    historico_path = f"{DATA_DIR}/historico_2023_2025.csv"
+    # ─────────────────────────────
+    # CARGA HISTÓRICO 2023–2025
+    # ─────────────────────────────
+    st.sidebar.header("📦 Cargar histórico 2023–2025 (uno por uno)")
 
-    if os.path.exists(historico_path):
-        df_existente = pd.read_csv(historico_path, encoding="latin1")
-        df_final = pd.concat([df_existente, df_temp], ignore_index=True)
-    else:
-        df_final = df_temp
+    uploaded_hist = st.sidebar.file_uploader(
+        "Subir un CSV histórico a la vez",
+        type="csv",
+        key="historico"
+    )
 
-    df_final.to_csv(historico_path, index=False)
-    st.sidebar.success("Archivo agregado al histórico correctamente ✅")
+    if uploaded_hist:
+        df_temp = pd.read_csv(uploaded_hist, encoding="latin1")
+        historico_path = f"{DATA_DIR}/historico_2023_2025.csv"
 
-# ─────────────────────────────
-# CARGA 2026
-# ─────────────────────────────
-st.sidebar.markdown("---")
-st.sidebar.header("📤 Actualizar información 2026")
+        if os.path.exists(historico_path):
+            df_existente = pd.read_csv(historico_path, encoding="latin1")
+            df_final = pd.concat([df_existente, df_temp], ignore_index=True)
+        else:
+            df_final = df_temp
 
-uploaded_2026 = st.sidebar.file_uploader(
-    "Subir CSV 2026",
-    type="csv",
-    key="anio2026"
-)
+        df_final.to_csv(historico_path, index=False)
+        st.sidebar.success("Archivo agregado al histórico correctamente ✅")
 
-if uploaded_2026:
-    df_2026_new = pd.read_csv(uploaded_2026, encoding="latin1")
-    df_2026_new.to_csv(f"{DATA_DIR}/asistencias_2026.csv", index=False)
-    st.sidebar.success("CSV 2026 actualizado correctamente")
+    # ─────────────────────────────
+    # CARGA 2026
+    # ─────────────────────────────
+    st.sidebar.markdown("---")
+    st.sidebar.header("📤 Actualizar información 2026")
+
+    uploaded_2026 = st.sidebar.file_uploader(
+        "Subir CSV 2026",
+        type="csv",
+        key="anio2026"
+    )
+
+    if uploaded_2026:
+        df_2026_new = pd.read_csv(uploaded_2026, encoding="latin1")
+        df_2026_new.to_csv(f"{DATA_DIR}/asistencias_2026.csv", index=False)
+        st.sidebar.success("CSV 2026 actualizado correctamente")
+
+else:
+    st.sidebar.markdown("## 🔎 Perfil Visualización")
+    st.sidebar.info("Modo solo lectura")
 
 # ─────────────────────────────
 # LECTURA ARCHIVOS
@@ -97,7 +120,6 @@ if not dfs:
 
 df = pd.concat(dfs, ignore_index=True)
 
-# Limpieza nombres columnas
 df.columns = df.columns.str.strip()
 
 # ─────────────────────────────
