@@ -104,7 +104,9 @@ def procesar_datos(df):
 
     df = df.dropna(subset=[fecha_col])
 
-    df["AÑO"] = df[fecha_col].dt.year.astype("int16")
+    # ✅ SOLUCIÓN LIMPIA: AÑO COMO STRING
+    df["AÑO"] = df[fecha_col].dt.year.astype(str)
+
     df["MES"] = df[fecha_col].dt.month.astype("int8")
 
     meses_dict = {
@@ -146,7 +148,8 @@ def procesar_datos(df):
         "Nombre del plan",
         "Tipo de Evento",
         "ESPECIALIDAD MEDICA (CITAS)",
-        "MES_NOMBRE"
+        "MES_NOMBRE",
+        "AÑO"
     ]
 
     for col in columnas_categoricas:
@@ -157,7 +160,7 @@ def procesar_datos(df):
 
 
 # ─────────────────────────────
-# EJECUCIÓN SEGURA
+# EJECUCIÓN
 # ─────────────────────────────
 
 try:
@@ -166,9 +169,11 @@ try:
 except Exception as e:
     st.error(f"Error procesando datos: {e}")
     st.stop()
+
 # ─────────────────────────────
-# FILTROS DEPENDIENTES
+# FILTROS
 # ─────────────────────────────
+
 st.sidebar.header("🎛️ Filtros")
 
 df_temp = df.copy()
@@ -261,19 +266,11 @@ if df_f.empty:
 # ─────────────────────────────
 # KPIs
 # ─────────────────────────────
+
 st.title("📊 Dashboard Operaciones GEA")
 
-filtros_activos = any([
-    anio, mes_nombre, grupo, servicio, subservicio,
-    estado, canal, especialidad, proveedor,
-    pais, provincia, ciudad, local_foraneo,
-    tipo_cliente, cliente, cuenta, plan, evento
-])
-
-df_kpi = df if not filtros_activos else df_f
-
-total_asistencias = df_kpi["Número Asistencia"].count()
-costo_total = df_kpi["Total de Costo Global"].sum()
+total_asistencias = df_f["Número Asistencia"].count()
+costo_total = df_f["Total de Costo Global"].sum()
 costo_promedio = costo_total / total_asistencias if total_asistencias > 0 else 0
 
 c1, c2, c3 = st.columns(3)
@@ -284,6 +281,7 @@ c3.metric("💲 Costo promedio", f"${costo_promedio:,.2f}")
 # ─────────────────────────────
 # RESUMEN EJECUTIVO
 # ─────────────────────────────
+
 st.subheader("📊 Resumen Ejecutivo")
 
 col1, col2 = st.columns(2)
@@ -310,17 +308,14 @@ fig_asist_mes = px.bar(
     asist_mes,
     x="MES_NOMBRE",
     y="Total Asistencias",
-    color=asist_mes["AÑO"].astype(str),  # ← convertir a texto
+    color="AÑO",
     barmode="group",
     category_orders={
         "MES_NOMBRE": orden_meses,
-        "color": sorted(asist_mes["AÑO"].astype(str).unique())
+        "AÑO": sorted(df_f["AÑO"].unique())
     }
 )
 
-fig_asist_mes.update_layout(
-    legend_title_text="AÑO"
-)
 col2.plotly_chart(fig_asist_mes, use_container_width=True)
 
 # ─────────────────────────────
@@ -339,14 +334,10 @@ top_servicios = (
     .head(10)
 )
 
-fig_top_servicios = px.bar(
-    top_servicios,
-    x="Nombre del Servicio",
-    y="Total"
+col_a.plotly_chart(
+    px.bar(top_servicios, x="Nombre del Servicio", y="Total"),
+    use_container_width=True
 )
-
-col_a.plotly_chart(fig_top_servicios, use_container_width=True)
-
 
 top_especialidad = (
     df_f.groupby("ESPECIALIDAD MEDICA (CITAS)")["Número Asistencia"]
@@ -356,13 +347,10 @@ top_especialidad = (
     .head(10)
 )
 
-fig_top_especialidad = px.bar(
-    top_especialidad,
-    x="ESPECIALIDAD MEDICA (CITAS)",
-    y="Total"
+col_b.plotly_chart(
+    px.bar(top_especialidad, x="ESPECIALIDAD MEDICA (CITAS)", y="Total"),
+    use_container_width=True
 )
-
-col_b.plotly_chart(fig_top_especialidad, use_container_width=True)
 
 # ─────────────────────────────
 # TABLA
@@ -377,9 +365,6 @@ tabla_estado = (
     .reset_index()
 )
 
-orden_meses = ["Ene","Feb","Mar","Abr","May","Jun",
-               "Jul","Ago","Sep","Oct","Nov","Dic"]
-
 tabla_estado = tabla_estado.pivot(
     index="Estado de Asistencia",
     columns="MES_NOMBRE",
@@ -393,6 +378,7 @@ tabla_estado["Total general"] = tabla_estado.sum(axis=1)
 tabla_estado = tabla_estado.sort_values("Total general", ascending=False)
 
 st.dataframe(tabla_estado, use_container_width=True)
+
 # ─────────────────────────────
 # PIE
 # ─────────────────────────────
