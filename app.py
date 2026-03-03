@@ -415,7 +415,8 @@ fig_pie.update_layout(height=400)
 
 col_pie.plotly_chart(fig_pie, use_container_width=True)
 
-# CANCELACIONES
+# ───── CANCELACIONES
+
 if "Estado de Asistencia" in df_f.columns:
 
     df_cancelados = df_f[
@@ -426,6 +427,8 @@ if "Estado de Asistencia" in df_f.columns:
 
 else:
     df_cancelados = pd.DataFrame()
+
+
 if not df_cancelados.empty and \
    "Motivo Cancelacion" in df_cancelados.columns and \
    "Submotivo Cancelacion" in df_cancelados.columns:
@@ -440,6 +443,34 @@ if not df_cancelados.empty and \
         df_cancelados["Motivo_Completo"]
         .str.replace(" - $", "", regex=True)
     )
+
+    top_cancelaciones = (
+        df_cancelados.groupby("Motivo_Completo")["Número Asistencia"]
+        .count()
+        .reset_index(name="Total")
+        .sort_values("Total", ascending=False)
+        .head(10)
+    )
+
+    fig_cancel = px.bar(
+        top_cancelaciones.sort_values("Total"),
+        x="Total",
+        y="Motivo_Completo",
+        orientation="h",
+        text_auto=True,
+        color_discrete_sequence=["#8B1E1E"]
+    )
+
+    fig_cancel.update_layout(
+        height=400,
+        yaxis_title="",
+        xaxis_title="Cantidad"
+    )
+
+    col_cancel.plotly_chart(fig_cancel, use_container_width=True)
+
+else:
+    col_cancel.info("No existen cancelaciones para los filtros seleccionados.")
 
     top_cancelaciones = (
         df_cancelados.groupby("Motivo_Completo")["Número Asistencia"]
