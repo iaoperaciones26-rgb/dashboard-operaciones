@@ -236,7 +236,12 @@ fig_total_asist = px.bar(
     total_anual,
     x="AÑO",
     y="Total Asistencias",
-    text_auto=True
+    text_auto=True,
+    category_orders={"AÑO": sorted(total_anual["AÑO"].unique())}
+)
+
+fig_total_asist.update_layout(
+    xaxis_type="category"
 )
 
 col1.plotly_chart(fig_total_asist, use_container_width=True)
