@@ -370,7 +370,15 @@ tabla_estado = tabla_estado.fillna(0).astype(int)
 tabla_estado["Total general"] = tabla_estado.sum(axis=1)
 tabla_estado = tabla_estado.sort_values("Total general", ascending=False)
 
-st.dataframe(tabla_estado, use_container_width=True, height=400)
+# Altura dinámica según número de filas
+filas = len(tabla_estado)
+altura_tabla = 70 + (filas * 35)
+
+st.dataframe(
+    tabla_estado,
+    use_container_width=True,
+    height=altura_tabla
+)
 
 # ─────────────────────────────
 # ESTADOS Y MOTIVOS DE CANCELACIONES
