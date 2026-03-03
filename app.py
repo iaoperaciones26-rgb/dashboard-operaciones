@@ -63,6 +63,10 @@ def cargar_datos():
     return df
 
 df = cargar_datos()
+df = cargar_datos()
+
+# 🔎 TEST 1: Total filas cargadas desde Drive
+st.write("Total filas cargadas (antes de procesar fecha):", len(df))
 
 # ─────────────────────────────
 # PROCESAMIENTO FECHA
@@ -70,7 +74,12 @@ df = cargar_datos()
 fecha_col = [c for c in df.columns if "fecha" in c.lower() and "asistencia" in c.lower()][0]
 
 df[fecha_col] = pd.to_datetime(df[fecha_col], errors="coerce")
+
+st.write("Filas después de convertir fecha:", len(df))
+
 df = df.dropna(subset=[fecha_col])
+
+st.write("Filas después de eliminar fechas inválidas:", len(df))
 
 df["AÑO"] = df[fecha_col].dt.year
 df["MES"] = df[fecha_col].dt.month
