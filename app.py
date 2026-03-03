@@ -416,6 +416,16 @@ fig_pie.update_layout(height=400)
 col_pie.plotly_chart(fig_pie, use_container_width=True)
 
 # CANCELACIONES
+if "Estado de Asistencia" in df_f.columns:
+
+    df_cancelados = df_f[
+        df_f["Estado de Asistencia"].isin(
+            ["Cancelado posterior", "Cancelado al momento"]
+        )
+    ].copy()
+
+else:
+    df_cancelados = pd.DataFrame()
 if not df_cancelados.empty and \
    "Motivo Cancelacion" in df_cancelados.columns and \
    "Submotivo Cancelacion" in df_cancelados.columns:
