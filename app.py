@@ -141,7 +141,8 @@ df = procesar_datos(cargar_datos())
 st.sidebar.header("🎛️ Filtros")
 
 if st.sidebar.button("🔄 Reset filtros"):
-    for key in st.session_state.keys():
+    keys = list(st.session_state.keys())  # ← copia segura
+    for key in keys:
         if key.startswith("filtro_"):
             st.session_state[key] = []
     st.rerun()
