@@ -188,8 +188,22 @@ df_f = df_temp.copy()
 # ─────────────────────────────
 st.title("📊 Dashboard Operaciones GEA")
 
-total_asistencias = df_f["Número Asistencia"].count()
-costo_total = df_f["Total de Costo Global"].sum()
+# Detectar si hay filtros activos
+filtros_activos = any([
+    anio, mes_nombre, grupo, servicio, subservicio,
+    estado, canal, especialidad, proveedor, pais,
+    provincia, ciudad, local_foraneo,
+    tipo_cliente, cliente, cuenta, plan, evento
+])
+
+# Si no hay filtros → usar dataset completo
+if not filtros_activos:
+    df_kpi = df
+else:
+    df_kpi = df_f
+
+total_asistencias = df_kpi["Número Asistencia"].count()
+costo_total = df_kpi["Total de Costo Global"].sum()
 costo_promedio = costo_total / total_asistencias if total_asistencias > 0 else 0
 
 c1, c2, c3 = st.columns(3)
