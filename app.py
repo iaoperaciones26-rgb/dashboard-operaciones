@@ -140,99 +140,129 @@ df = procesar_datos(cargar_datos())
 # ─────────────────────────────
 st.sidebar.header("🎛️ Filtros")
 
-# Reset global
+# Inicializar filtros aplicados
+if "filtros_aplicados" not in st.session_state:
+    st.session_state.filtros_aplicados = {}
+
+# Reset
 if st.sidebar.button("🔄 Reset filtros"):
-    st.session_state.clear()
-    st.session_state.authenticated = True
+    st.session_state.filtros_aplicados = {}
     st.rerun()
 
-# Formulario para evitar múltiples ejecuciones
-with st.sidebar.form("filtros_form"):
+df_temp = df.copy()
 
-    df_temp = df.copy()
+# ───── FILTROS DINÁMICOS (CASCADA)
+def filtro_cascada(label, columna):
+    opciones = sorted(df_temp[columna].dropna().unique())
+    return st.sidebar.multiselect(label, opciones, key=f"ui_{columna}")
 
-    def filtro(label, columna):
-        opciones = sorted(df[columna].dropna().unique())
-        return st.multiselect(label, opciones)
+anio = filtro_cascada("Año", "AÑO")
+if anio:
+    df_temp = df_temp[df_temp["AÑO"].isin(anio)]
 
-    anio = filtro("Año", "AÑO")
-    mes_nombre = filtro("Mes", "MES_NOMBRE")
-    grupo = filtro("Grupo de Servicio", "Grupo de Servicio")
-    servicio = filtro("Nombre del Servicio", "Nombre del Servicio")
-    subservicio = filtro("Subservicio", "Nombre del Subservicio")
-    estado = filtro("Estado de Asistencia", "Estado de Asistencia")
-    canal = filtro("Canal Origen", "Canal Origen")
-    especialidad = filtro("Especialidad Médica", "ESPECIALIDAD MEDICA (CITAS)")
-    proveedor = filtro("Proveedor", "Nombre del Proveedor")
-    pais = filtro("País", "País")
-    provincia = filtro("Provincia", "Provincia")
-    ciudad = filtro("Ciudad", "Ciudad")
-    local_foraneo = filtro("Local / Foráneo", "Local_Foráneo")
-    tipo_cliente = filtro("Tipo de Cliente", "TIPO DE CLIENTE")
-    cliente = filtro("Cliente Institucional", "Cliente Institucional")
-    cuenta = filtro("Nombre de la cuenta", "Nombre de la cuenta")
-    plan = filtro("Nombre del plan", "Nombre del plan")
-    evento = filtro("Tipo de Evento", "Tipo de Evento")
+mes_nombre = filtro_cascada("Mes", "MES_NOMBRE")
+if mes_nombre:
+    df_temp = df_temp[df_temp["MES_NOMBRE"].isin(mes_nombre)]
 
-    aplicar = st.form_submit_button("Aplicar filtros")
+grupo = filtro_cascada("Grupo de Servicio", "Grupo de Servicio")
+if grupo:
+    df_temp = df_temp[df_temp["Grupo de Servicio"].isin(grupo)]
 
-# Solo aplicar filtros cuando se presiona el botón
-if aplicar:
+servicio = filtro_cascada("Nombre del Servicio", "Nombre del Servicio")
+if servicio:
+    df_temp = df_temp[df_temp["Nombre del Servicio"].isin(servicio)]
 
-    if anio:
-        df_temp = df_temp[df_temp["AÑO"].isin(anio)]
+subservicio = filtro_cascada("Subservicio", "Nombre del Subservicio")
+if subservicio:
+    df_temp = df_temp[df_temp["Nombre del Subservicio"].isin(subservicio)]
 
-    if mes_nombre:
-        df_temp = df_temp[df_temp["MES_NOMBRE"].isin(mes_nombre)]
+estado = filtro_cascada("Estado de Asistencia", "Estado de Asistencia")
+if estado:
+    df_temp = df_temp[df_temp["Estado de Asistencia"].isin(estado)]
 
-    if grupo:
-        df_temp = df_temp[df_temp["Grupo de Servicio"].isin(grupo)]
+canal = filtro_cascada("Canal Origen", "Canal Origen")
+if canal:
+    df_temp = df_temp[df_temp["Canal Origen"].isin(canal)]
 
-    if servicio:
-        df_temp = df_temp[df_temp["Nombre del Servicio"].isin(servicio)]
+especialidad = filtro_cascada("Especialidad Médica", "ESPECIALIDAD MEDICA (CITAS)")
+if especialidad:
+    df_temp = df_temp[df_temp["ESPECIALIDAD MEDICA (CITAS)"].isin(especialidad)]
 
-    if subservicio:
-        df_temp = df_temp[df_temp["Nombre del Subservicio"].isin(subservicio)]
+proveedor = filtro_cascada("Proveedor", "Nombre del Proveedor")
+if proveedor:
+    df_temp = df_temp[df_temp["Nombre del Proveedor"].isin(proveedor)]
 
-    if estado:
-        df_temp = df_temp[df_temp["Estado de Asistencia"].isin(estado)]
+pais = filtro_cascada("País", "País")
+if pais:
+    df_temp = df_temp[df_temp["País"].isin(pais)]
 
-    if canal:
-        df_temp = df_temp[df_temp["Canal Origen"].isin(canal)]
+provincia = filtro_cascada("Provincia", "Provincia")
+if provincia:
+    df_temp = df_temp[df_temp["Provincia"].isin(provincia)]
 
-    if especialidad:
-        df_temp = df_temp[df_temp["ESPECIALIDAD MEDICA (CITAS)"].isin(especialidad)]
+ciudad = filtro_cascada("Ciudad", "Ciudad")
+if ciudad:
+    df_temp = df_temp[df_temp["Ciudad"].isin(ciudad)]
 
-    if proveedor:
-        df_temp = df_temp[df_temp["Nombre del Proveedor"].isin(proveedor)]
+local_foraneo = filtro_cascada("Local / Foráneo", "Local_Foráneo")
+if local_foraneo:
+    df_temp = df_temp[df_temp["Local_Foráneo"].isin(local_foraneo)]
 
-    if pais:
-        df_temp = df_temp[df_temp["País"].isin(pais)]
+tipo_cliente = filtro_cascada("Tipo de Cliente", "TIPO DE CLIENTE")
+if tipo_cliente:
+    df_temp = df_temp[df_temp["TIPO DE CLIENTE"].isin(tipo_cliente)]
 
-    if provincia:
-        df_temp = df_temp[df_temp["Provincia"].isin(provincia)]
+cliente = filtro_cascada("Cliente Institucional", "Cliente Institucional")
+if cliente:
+    df_temp = df_temp[df_temp["Cliente Institucional"].isin(cliente)]
 
-    if ciudad:
-        df_temp = df_temp[df_temp["Ciudad"].isin(ciudad)]
+cuenta = filtro_cascada("Nombre de la cuenta", "Nombre de la cuenta")
+if cuenta:
+    df_temp = df_temp[df_temp["Nombre de la cuenta"].isin(cuenta)]
 
-    if local_foraneo:
-        df_temp = df_temp[df_temp["Local_Foráneo"].isin(local_foraneo)]
+plan = filtro_cascada("Nombre del plan", "Nombre del plan")
+if plan:
+    df_temp = df_temp[df_temp["Nombre del plan"].isin(plan)]
 
-    if tipo_cliente:
-        df_temp = df_temp[df_temp["TIPO DE CLIENTE"].isin(tipo_cliente)]
+evento = filtro_cascada("Tipo de Evento", "Tipo de Evento")
+if evento:
+    df_temp = df_temp[df_temp["Tipo de Evento"].isin(evento)]
 
-    if cliente:
-        df_temp = df_temp[df_temp["Cliente Institucional"].isin(cliente)]
+# Botón aplicar
+if st.sidebar.button("Aplicar filtros"):
+    st.session_state.filtros_aplicados = {
+        "AÑO": anio,
+        "MES_NOMBRE": mes_nombre,
+        "Grupo de Servicio": grupo,
+        "Nombre del Servicio": servicio,
+        "Nombre del Subservicio": subservicio,
+        "Estado de Asistencia": estado,
+        "Canal Origen": canal,
+        "ESPECIALIDAD MEDICA (CITAS)": especialidad,
+        "Nombre del Proveedor": proveedor,
+        "País": pais,
+        "Provincia": provincia,
+        "Ciudad": ciudad,
+        "Local_Foráneo": local_foraneo,
+        "TIPO DE CLIENTE": tipo_cliente,
+        "Cliente Institucional": cliente,
+        "Nombre de la cuenta": cuenta,
+        "Nombre del plan": plan,
+        "Tipo de Evento": evento
+    }
+    st.rerun()
 
-    if cuenta:
-        df_temp = df_temp[df_temp["Nombre de la cuenta"].isin(cuenta)]
+# ───── APLICAR SOLO FILTROS CONFIRMADOS
+df_f = df.copy()
 
-    if plan:
-        df_temp = df_temp[df_temp["Nombre del plan"].isin(plan)]
+for columna, valores in st.session_state.filtros_aplicados.items():
+    if valores:
+        df_f = df_f[df_f[columna].isin(valores)]
 
-    if evento:
-        df_temp = df_temp[df_temp["Tipo de Evento"].isin(evento)]
-
+if df_f.empty:
+    st.warning("No hay datos con los filtros seleccionados.")
+    st.stop()
+    
 df_f = df_temp.copy()
 
 if df_f.empty:
