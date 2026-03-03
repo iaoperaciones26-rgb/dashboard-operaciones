@@ -59,7 +59,6 @@ def cargar_datos():
 
     return df
 
-
 df = cargar_datos()
 
 # ─────────────────────────────
@@ -92,7 +91,7 @@ df["Total de Costo Global"] = (
 )
 
 # ─────────────────────────────
-# FILTROS (DEPURADOS)
+# FILTROS (QUITADOS AÑO, MES, PAÍS)
 # ─────────────────────────────
 st.sidebar.header("🎛️ Filtros")
 
@@ -103,8 +102,6 @@ def filtro(label, columna):
     seleccion = st.sidebar.multiselect(label, opciones)
     return seleccion
 
-# Eliminados Año, Mes y País
-
 grupo = filtro("Grupo de Servicio", "Grupo de Servicio")
 if grupo:
     df_temp = df_temp[df_temp["Grupo de Servicio"].isin(grupo)]
@@ -112,6 +109,10 @@ if grupo:
 servicio = filtro("Nombre del Servicio", "Nombre del Servicio")
 if servicio:
     df_temp = df_temp[df_temp["Nombre del Servicio"].isin(servicio)]
+
+subservicio = filtro("Subservicio", "Nombre del Subservicio")
+if subservicio:
+    df_temp = df_temp[df_temp["Nombre del Subservicio"].isin(subservicio)]
 
 estado = filtro("Estado de Asistencia", "Estado de Asistencia")
 if estado:
@@ -121,9 +122,45 @@ canal = filtro("Canal Origen", "Canal Origen")
 if canal:
     df_temp = df_temp[df_temp["Canal Origen"].isin(canal)]
 
+especialidad = filtro("Especialidad Médica", "ESPECIALIDAD MEDICA (CITAS)")
+if especialidad:
+    df_temp = df_temp[df_temp["ESPECIALIDAD MEDICA (CITAS)"].isin(especialidad)]
+
 proveedor = filtro("Proveedor", "Nombre del Proveedor")
 if proveedor:
     df_temp = df_temp[df_temp["Nombre del Proveedor"].isin(proveedor)]
+
+provincia = filtro("Provincia", "Provincia")
+if provincia:
+    df_temp = df_temp[df_temp["Provincia"].isin(provincia)]
+
+ciudad = filtro("Ciudad", "Ciudad")
+if ciudad:
+    df_temp = df_temp[df_temp["Ciudad"].isin(ciudad)]
+
+local_foraneo = filtro("Local / Foráneo", "Local_Foráneo")
+if local_foraneo:
+    df_temp = df_temp[df_temp["Local_Foráneo"].isin(local_foraneo)]
+
+tipo_cliente = filtro("Tipo de Cliente", "TIPO DE CLIENTE")
+if tipo_cliente:
+    df_temp = df_temp[df_temp["TIPO DE CLIENTE"].isin(tipo_cliente)]
+
+cliente = filtro("Cliente Institucional", "Cliente Institucional")
+if cliente:
+    df_temp = df_temp[df_temp["Cliente Institucional"].isin(cliente)]
+
+cuenta = filtro("Nombre de la cuenta", "Nombre de la cuenta")
+if cuenta:
+    df_temp = df_temp[df_temp["Nombre de la cuenta"].isin(cuenta)]
+
+plan = filtro("Nombre del plan", "Nombre del plan")
+if plan:
+    df_temp = df_temp[df_temp["Nombre del plan"].isin(plan)]
+
+evento = filtro("Tipo de Evento", "Tipo de Evento")
+if evento:
+    df_temp = df_temp[df_temp["Tipo de Evento"].isin(evento)]
 
 df_f = df_temp.copy()
 
@@ -146,7 +183,7 @@ c2.metric("💲 Costo total", f"${costo_total:,.2f}")
 c3.metric("💲 Costo promedio", f"${costo_promedio:,.2f}")
 
 # ─────────────────────────────
-# GRÁFICOS
+# GRÁFICOS (QUITADOS COSTOS)
 # ─────────────────────────────
 st.subheader("📊 Resumen Ejecutivo")
 
@@ -154,7 +191,6 @@ col1, col2 = st.columns(2)
 
 # Total asistencias por año
 total_anual = df_f.groupby("AÑO")["Número Asistencia"].count().reset_index(name="Total")
-
 fig1 = px.bar(total_anual, x="AÑO", y="Total", text_auto=True, title="Total Asistencias por Año")
 col1.plotly_chart(fig1, use_container_width=True)
 
@@ -163,7 +199,6 @@ orden_meses = ["Ene","Feb","Mar","Abr","May","Jun",
                "Jul","Ago","Sep","Oct","Nov","Dic"]
 
 asist_mes = df_f.groupby(["MES_NOMBRE","MES"])["Número Asistencia"].count().reset_index(name="Total")
-
 fig2 = px.bar(
     asist_mes,
     x="MES_NOMBRE",
@@ -171,44 +206,34 @@ fig2 = px.bar(
     category_orders={"MES_NOMBRE": orden_meses},
     title="Asistencias por Mes"
 )
-
 col2.plotly_chart(fig2, use_container_width=True)
 
 # ─────────────────────────────
-# TOP SERVICIOS
+# TOPS
 # ─────────────────────────────
-st.subheader("🏆 Top Servicios")
+st.subheader("🏆 Top servicios y especialidades")
 
-top_servicios = (
-    df_f.groupby("Nombre del Servicio")["Número Asistencia"]
-    .count()
-    .reset_index(name="Total")
-    .sort_values("Total", ascending=False)
-    .head(10)
-)
+col_a, col_b = st.columns(2)
 
-st.plotly_chart(px.bar(top_servicios, x="Nombre del Servicio", y="Total"), use_container_width=True)
+top_servicios = df_f.groupby("Nombre del Servicio")["Número Asistencia"].count().reset_index(name="Total").sort_values("Total", ascending=False).head(10)
+col_a.plotly_chart(px.bar(top_servicios, x="Nombre del Servicio", y="Total"), use_container_width=True)
+
+top_especialidad = df_f.groupby("ESPECIALIDAD MEDICA (CITAS)")["Número Asistencia"].count().reset_index(name="Total").sort_values("Total", ascending=False).head(10)
+col_b.plotly_chart(px.bar(top_especialidad, x="ESPECIALIDAD MEDICA (CITAS)", y="Total"), use_container_width=True)
 
 # ─────────────────────────────
-# TABLA ESTADO
+# TABLA
 # ─────────────────────────────
-st.subheader("📋 Estado de Asistencia")
+st.subheader("📋 Estado de Asistencia por Mes")
 
-tabla_estado = (
-    df_f.groupby("Estado de Asistencia")["Número Asistencia"]
-    .count()
-    .reset_index(name="Total")
-    .sort_values("Total", ascending=False)
-)
-
+tabla_estado = df_f.groupby(["Estado de Asistencia","MES"])["Número Asistencia"].count().reset_index().pivot(index="Estado de Asistencia", columns="MES", values="Número Asistencia").fillna(0).astype(int)
+tabla_estado["Total general"] = tabla_estado.sum(axis=1)
 st.dataframe(tabla_estado, use_container_width=True)
 
 # ─────────────────────────────
 # PIE
 # ─────────────────────────────
-st.subheader("🥧 Distribución por Estado")
+st.subheader("🥧 % Estado de Asistencia")
 
-st.plotly_chart(
-    px.pie(tabla_estado, names="Estado de Asistencia", values="Total", hole=0.4),
-    use_container_width=True
-)
+estado_totales = df_f.groupby("Estado de Asistencia")["Número Asistencia"].count().reset_index()
+st.plotly_chart(px.pie(estado_totales, names="Estado de Asistencia", values="Número Asistencia", hole=0.4), use_container_width=True)
