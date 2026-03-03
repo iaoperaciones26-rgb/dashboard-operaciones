@@ -74,16 +74,41 @@ if not st.session_state.authenticated:
     st.stop()
 
 # ─────────────────────────────
-# CARGA DE DATOS
+# CARGA OPTIMIZADA (SOLO COLUMNAS NECESARIAS)
 # ─────────────────────────────
 @st.cache_data(show_spinner=True)
-def cargar_datos():
+def load_all():
+
     files = {
         "2023": "1jVvFPdg5A5ySOQtKeuO1pLU6zG2cTa51",
         "2024": "1YnRJtc6_NyXmXjmOMLP8oINOmqr7e3_I",
         "2025": "1_etz-VsH66PpmnHVEo2H-wVgwkd4DKMl",
         "2026": "1oZIhTS7zPGcHFF5cpM2LdnbWuUlyK2N6"
     }
+
+    columnas = [
+        "Número Asistencia",
+        "Fecha creación de asistencia",
+        "Total de Costo Global",
+        "Grupo de Servicio",
+        "Nombre del Servicio",
+        "Nombre del Subservicio",
+        "Estado de Asistencia",
+        "Canal Origen",
+        "ESPECIALIDAD MEDICA (CITAS)",
+        "Nombre del Proveedor",
+        "País",
+        "Provincia",
+        "Ciudad",
+        "Local_Foráneo",
+        "TIPO DE CLIENTE",
+        "Cliente Institucional",
+        "Nombre de la cuenta",
+        "Nombre del plan",
+        "Tipo de Evento",
+        "Motivo Cancelacion",
+        "Submotivo Cancelacion"
+    ]
 
     dfs = []
 
@@ -94,23 +119,25 @@ def cargar_datos():
         if not os.path.exists(output):
             gdown.download(url, output, quiet=True)
 
-        df_temp = pd.read_csv(output, encoding="latin1", low_memory=False)
+        df_temp = pd.read_csv(
+            output,
+            encoding="latin1",
+            low_memory=False,
+            usecols=lambda c: c in columnas
+        )
+
         dfs.append(df_temp)
 
     df = pd.concat(dfs, ignore_index=True)
     df.columns = df.columns.str.replace('\ufeff', '', regex=False).str.strip()
-    return df
 
-
-@st.cache_data(show_spinner=False)
-def procesar_datos(df):
-    fecha_col = [c for c in df.columns if "fecha" in c.lower() and "asistencia" in c.lower()][0]
-
+    # ───── PROCESAMIENTO
+    fecha_col = [c for c in df.columns if "fecha" in c.lower()][0]
     df[fecha_col] = pd.to_datetime(df[fecha_col], dayfirst=True, errors="coerce")
     df = df.dropna(subset=[fecha_col])
 
-    df["AÑO"] = df[fecha_col].dt.year.astype(str)
-    df["MES"] = df[fecha_col].dt.month
+    df["AÑO"] = df[fecha_col].dt.year.astype("int16").astype(str)
+    df["MES"] = df[fecha_col].dt.month.astype("int8")
 
     meses_dict = {
         1: "Ene", 2: "Feb", 3: "Mar", 4: "Abr",
@@ -127,26 +154,55 @@ def procesar_datos(df):
         .astype(str)
         .str.replace("$", "", regex=False)
         .str.replace(",", "", regex=False)
-        .astype(float)
     )
+
+    df["Total de Costo Global"] = pd.to_numeric(
+        df["Total de Costo Global"],
+        errors="coerce"
+    ).fillna(0)
+
+    # ───── CONVERTIR A CATEGORY (GRAN REDUCCIÓN DE MEMORIA)
+    columnas_cat = [
+        "AÑO", "MES_NOMBRE",
+        "Grupo de Servicio",
+        "Nombre del Servicio",
+        "Nombre del Subservicio",
+        "Estado de Asistencia",
+        "Canal Origen",
+        "ESPECIALIDAD MEDICA (CITAS)",
+        "Nombre del Proveedor",
+        "País", "Provincia", "Ciudad",
+        "Local_Foráneo",
+        "TIPO DE CLIENTE",
+        "Cliente Institucional",
+        "Nombre de la cuenta",
+        "Nombre del plan",
+        "Tipo de Evento",
+        "Motivo Cancelacion",
+        "Submotivo Cancelacion"
+    ]
+
+    for c in columnas_cat:
+        if c in df.columns:
+            df[c] = df[c].astype("category")
 
     return df
 
 
-df = procesar_datos(cargar_datos())
+df = load_all()
 
 # ─────────────────────────────
-# FILTROS (MISMO ORDEN ORIGINAL)
+# FILTROS (SIN COPIAS)
 # ─────────────────────────────
 st.sidebar.header("🎛️ Filtros")
 
 if st.sidebar.button("🔄 Reset filtros"):
-    for key in st.session_state.keys():
+    for key in list(st.session_state):
         if key.startswith("filtro_"):
-            st.session_state[key] = []
+            del st.session_state[key]
     st.rerun()
 
-df_temp = df.copy()
+df_temp = df  # ← sin copy
 
 def filtro_cascada(label, columna):
     opciones = sorted(df_temp[columna].dropna().unique())
@@ -224,7 +280,7 @@ evento = filtro_cascada("Tipo de Evento", "Tipo de Evento")
 if evento:
     df_temp = df_temp[df_temp["Tipo de Evento"].isin(evento)]
 
-df_f = df_temp.copy()
+df_f = df_temp  # ← sin copy
 
 if df_f.empty:
     st.warning("No hay datos con los filtros seleccionados.")
@@ -242,10 +298,10 @@ c1, c2, c3 = st.columns(3)
 c1.metric("Total asistencias", f"{total_asistencias:,}")
 c2.metric("Costo total", f"${costo_total:,.2f}")
 c3.metric("Costo promedio", f"${costo_promedio:,.2f}")
+
 # ─────────────────────────────
 # RESUMEN EJECUTIVO
 # ─────────────────────────────
-
 st.subheader("📊 Resumen Ejecutivo")
 
 col1, col2 = st.columns(2)
@@ -255,7 +311,7 @@ orden_meses = ["Ene","Feb","Mar","Abr","May","Jun",
 
 # Total asistencias por año
 total_anual = (
-    df_f.groupby("AÑO")["Número Asistencia"]
+    df_f.groupby("AÑO", observed=True)["Número Asistencia"]
     .count()
     .reset_index(name="Total Asistencias")
 )
@@ -276,7 +332,7 @@ col1.plotly_chart(fig_total_asist, use_container_width=True)
 
 # Asistencias por mes
 asist_mes = (
-    df_f.groupby(["AÑO","MES_NOMBRE"])["Número Asistencia"]
+    df_f.groupby(["AÑO","MES_NOMBRE"], observed=True)["Número Asistencia"]
     .count()
     .reset_index(name="Total Asistencias")
 )
@@ -300,13 +356,12 @@ col2.plotly_chart(fig_asist_mes, use_container_width=True)
 # ─────────────────────────────
 # TOP SERVICIOS Y ESPECIALIDADES
 # ─────────────────────────────
-
 st.subheader("🏆 Top servicios y especialidades")
 
 col_a, col_b = st.columns(2)
 
 top_servicios = (
-    df_f.groupby("Nombre del Servicio")["Número Asistencia"]
+    df_f.groupby("Nombre del Servicio", observed=True)["Número Asistencia"]
     .count()
     .reset_index(name="Total")
     .sort_values("Total", ascending=False)
@@ -326,7 +381,7 @@ fig_top_serv.update_layout(height=400)
 col_a.plotly_chart(fig_top_serv, use_container_width=True)
 
 top_especialidad = (
-    df_f.groupby("ESPECIALIDAD MEDICA (CITAS)")["Número Asistencia"]
+    df_f.groupby("ESPECIALIDAD MEDICA (CITAS)", observed=True)["Número Asistencia"]
     .count()
     .reset_index(name="Total")
     .sort_values("Total", ascending=False)
@@ -348,11 +403,10 @@ col_b.plotly_chart(fig_top_esp, use_container_width=True)
 # ─────────────────────────────
 # TABLA
 # ─────────────────────────────
-
 st.subheader("📋 Estado de Asistencia por Mes")
 
 tabla_estado = (
-    df_f.groupby(["Estado de Asistencia", "MES_NOMBRE"])["Número Asistencia"]
+    df_f.groupby(["Estado de Asistencia", "MES_NOMBRE"], observed=True)["Número Asistencia"]
     .count()
     .reset_index()
 )
@@ -369,7 +423,6 @@ tabla_estado = tabla_estado.fillna(0).astype(int)
 tabla_estado["Total general"] = tabla_estado.sum(axis=1)
 tabla_estado = tabla_estado.sort_values("Total general", ascending=False)
 
-# Altura dinámica según número de filas
 filas = len(tabla_estado)
 altura_tabla = 70 + (filas * 35)
 
@@ -382,14 +435,13 @@ st.dataframe(
 # ─────────────────────────────
 # ESTADOS Y MOTIVOS DE CANCELACIONES
 # ─────────────────────────────
-
 st.subheader("Estados y Motivos de Cancelaciones")
 
 col_pie, col_cancel = st.columns([1, 1.4])
 
-# PIE INSTITUCIONAL
+# PIE
 estado_totales = (
-    df_f.groupby("Estado de Asistencia")["Número Asistencia"]
+    df_f.groupby("Estado de Asistencia", observed=True)["Número Asistencia"]
     .count()
     .reset_index()
 )
@@ -412,36 +464,32 @@ fig_pie.update_layout(height=400)
 
 col_pie.plotly_chart(fig_pie, use_container_width=True)
 
-# ───── CANCELACIONES
+# ───── CANCELACIONES (sin copy grande)
 
-df_cancelados = df_f[
+df_cancelados = df_f.loc[
     df_f["Estado de Asistencia"].isin(
         ["Cancelado posterior", "Cancelado al momento"]
     )
-].copy()
+]
 
 if not df_cancelados.empty and \
    "Motivo Cancelacion" in df_cancelados.columns and \
    "Submotivo Cancelacion" in df_cancelados.columns:
 
-    df_cancelados["Motivo_Completo"] = (
-        df_cancelados["Motivo Cancelacion"].fillna("").astype(str)
+    motivo_completo = (
+        df_cancelados["Motivo Cancelacion"].astype(str)
         + " - "
-        + df_cancelados["Submotivo Cancelacion"].fillna("").astype(str)
-    )
-
-    df_cancelados["Motivo_Completo"] = (
-        df_cancelados["Motivo_Completo"]
-        .str.replace(" - $", "", regex=True)
-    )
+        + df_cancelados["Submotivo Cancelacion"].astype(str)
+    ).str.replace(" - $", "", regex=True)
 
     top_cancelaciones = (
-        df_cancelados.groupby("Motivo_Completo")["Número Asistencia"]
-        .count()
-        .reset_index(name="Total")
-        .sort_values("Total", ascending=False)
+        motivo_completo
+        .value_counts()
         .head(10)
+        .reset_index()
     )
+
+    top_cancelaciones.columns = ["Motivo_Completo", "Total"]
 
     fig_cancel = px.bar(
         top_cancelaciones.sort_values("Total"),
