@@ -178,9 +178,9 @@ st.sidebar.header("🎛️ Filtros")
 
 # Botón Reset Filtros
 if st.sidebar.button("🔄 Reset filtros"):
-    for key in list(st.session_state.keys()):
+    for key in st.session_state.keys():
         if key.startswith("filtro_"):
-            del st.session_state[key]
+            st.session_state[key] = []
     st.rerun()
 
 df_temp = df.copy()
@@ -188,12 +188,21 @@ df_temp = df.copy()
 def filtro_cascada(label, columna):
     if columna not in df_temp.columns:
         return []
+
     opciones = sorted(df_temp[columna].dropna().unique())
+    key_name = f"filtro_{columna}"
+
+    # Inicializar si no existe
+    if key_name not in st.session_state:
+        st.session_state[key_name] = []
+
     seleccion = st.sidebar.multiselect(
         label,
         opciones,
-        key=f"filtro_{columna}"
+        key=key_name,
+        default=st.session_state[key_name]
     )
+
     return seleccion
     
 anio = filtro_cascada("Año", "AÑO")
