@@ -97,107 +97,60 @@ df["Total de Costo Global"] = (
 )
 
 # ─────────────────────────────
-# FILTROS DEPENDIENTES (CASCADA)
+# FILTROS COMPLETOS
 # ─────────────────────────────
-
 st.sidebar.header("🎛️ Filtros")
 
-df_temp = df.copy()
-
-def filtro_cascada(label, columna):
-    opciones = sorted(df_temp[columna].dropna().unique())
-    seleccion = st.sidebar.multiselect(label, opciones)
-
-    if seleccion:
-        return seleccion
+def multiselect_filter(label, column):
+    if column in df.columns:
+        return st.sidebar.multiselect(
+            label,
+            sorted(df[column].dropna().unique())
+        )
     return []
 
-# Año
-anio = filtro_cascada("Año", "AÑO")
-if anio:
-    df_temp = df_temp[df_temp["AÑO"].isin(anio)]
+anio = multiselect_filter("Año", "AÑO")
 
-# Mes
-mes_nombre = filtro_cascada("Mes", "MES_NOMBRE")
-if mes_nombre:
-    df_temp = df_temp[df_temp["MES_NOMBRE"].isin(mes_nombre)]
+# 🔵 FILTRO MES CON NOMBRE
+mes_nombre = multiselect_filter("Mes", "MES_NOMBRE")
 
-# Grupo
-grupo = filtro_cascada("Grupo de Servicio", "Grupo de Servicio")
-if grupo:
-    df_temp = df_temp[df_temp["Grupo de Servicio"].isin(grupo)]
+estado = multiselect_filter("Estado de Asistencia", "Estado de Asistencia")
+canal = multiselect_filter("Canal Origen", "Canal Origen")
+grupo = multiselect_filter("Grupo de Servicio", "Grupo de Servicio")
+servicio = multiselect_filter("Nombre del Servicio", "Nombre del Servicio")
+subservicio = multiselect_filter("Subservicio", "Nombre del Subservicio")
+especialidad = multiselect_filter("Especialidad Médica", "ESPECIALIDAD MEDICA (CITAS)")
+proveedor = multiselect_filter("Proveedor", "Nombre del Proveedor")
+pais = multiselect_filter("País", "País")
+provincia = multiselect_filter("Provincia", "Provincia")
+ciudad = multiselect_filter("Ciudad", "Ciudad")
+local_foraneo = multiselect_filter("Local / Foráneo", "Local_Foráneo")
+tipo_cliente = multiselect_filter("Tipo de Cliente", "TIPO DE CLIENTE")
+cliente = multiselect_filter("Cliente Institucional", "Cliente Institucional")
+cuenta = multiselect_filter("Nombre de la cuenta", "Nombre de la cuenta")
+plan = multiselect_filter("Nombre del plan", "Nombre del plan")
+evento = multiselect_filter("Tipo de Evento", "Tipo de Evento")
 
-# Servicio
-servicio = filtro_cascada("Nombre del Servicio", "Nombre del Servicio")
-if servicio:
-    df_temp = df_temp[df_temp["Nombre del Servicio"].isin(servicio)]
+df_f = df.copy()
 
-# Subservicio
-subservicio = filtro_cascada("Subservicio", "Nombre del Subservicio")
-if subservicio:
-    df_temp = df_temp[df_temp["Nombre del Subservicio"].isin(subservicio)]
-
-# Estado
-estado = filtro_cascada("Estado de Asistencia", "Estado de Asistencia")
-if estado:
-    df_temp = df_temp[df_temp["Estado de Asistencia"].isin(estado)]
-
-# Canal
-canal = filtro_cascada("Canal Origen", "Canal Origen")
-if canal:
-    df_temp = df_temp[df_temp["Canal Origen"].isin(canal)]
-
-# Especialidad
-especialidad = filtro_cascada("Especialidad Médica", "ESPECIALIDAD MEDICA (CITAS)")
-if especialidad:
-    df_temp = df_temp[df_temp["ESPECIALIDAD MEDICA (CITAS)"].isin(especialidad)]
-
-# Proveedor
-proveedor = filtro_cascada("Proveedor", "Nombre del Proveedor")
-if proveedor:
-    df_temp = df_temp[df_temp["Nombre del Proveedor"].isin(proveedor)]
-
-# País
-pais = filtro_cascada("País", "País")
-if pais:
-    df_temp = df_temp[df_temp["País"].isin(pais)]
-
-# Provincia
-provincia = filtro_cascada("Provincia", "Provincia")
-if provincia:
-    df_temp = df_temp[df_temp["Provincia"].isin(provincia)]
-
-# Ciudad
-ciudad = filtro_cascada("Ciudad", "Ciudad")
-if ciudad:
-    df_temp = df_temp[df_temp["Ciudad"].isin(ciudad)]
-
-# Otros
-local_foraneo = filtro_cascada("Local / Foráneo", "Local_Foráneo")
-if local_foraneo:
-    df_temp = df_temp[df_temp["Local_Foráneo"].isin(local_foraneo)]
-
-tipo_cliente = filtro_cascada("Tipo de Cliente", "TIPO DE CLIENTE")
-if tipo_cliente:
-    df_temp = df_temp[df_temp["TIPO DE CLIENTE"].isin(tipo_cliente)]
-
-cliente = filtro_cascada("Cliente Institucional", "Cliente Institucional")
-if cliente:
-    df_temp = df_temp[df_temp["Cliente Institucional"].isin(cliente)]
-
-cuenta = filtro_cascada("Nombre de la cuenta", "Nombre de la cuenta")
-if cuenta:
-    df_temp = df_temp[df_temp["Nombre de la cuenta"].isin(cuenta)]
-
-plan = filtro_cascada("Nombre del plan", "Nombre del plan")
-if plan:
-    df_temp = df_temp[df_temp["Nombre del plan"].isin(plan)]
-
-evento = filtro_cascada("Tipo de Evento", "Tipo de Evento")
-if evento:
-    df_temp = df_temp[df_temp["Tipo de Evento"].isin(evento)]
-
-df_f = df_temp.copy()
+if anio: df_f = df_f[df_f["AÑO"].isin(anio)]
+if mes_nombre: df_f = df_f[df_f["MES_NOMBRE"].isin(mes_nombre)]
+if estado: df_f = df_f[df_f["Estado de Asistencia"].isin(estado)]
+if canal: df_f = df_f[df_f["Canal Origen"].isin(canal)]
+if grupo: df_f = df_f[df_f["Grupo de Servicio"].isin(grupo)]
+if servicio: df_f = df_f[df_f["Nombre del Servicio"].isin(servicio)]
+if subservicio: df_f = df_f[df_f["Nombre del Subservicio"].isin(subservicio)]
+if especialidad: df_f = df_f[df_f["ESPECIALIDAD MEDICA (CITAS)"].isin(especialidad)]
+if proveedor: df_f = df_f[df_f["Nombre del Proveedor"].isin(proveedor)]
+if pais: df_f = df_f[df_f["País"].isin(pais)]
+if provincia: df_f = df_f[df_f["Provincia"].isin(provincia)]
+if ciudad: df_f = df_f[df_f["Ciudad"].isin(ciudad)]
+if local_foraneo: df_f = df_f[df_f["Local_Foráneo"].isin(local_foraneo)]
+if tipo_cliente: df_f = df_f[df_f["TIPO DE CLIENTE"].isin(tipo_cliente)]
+if cliente: df_f = df_f[df_f["Cliente Institucional"].isin(cliente)]
+if cuenta: df_f = df_f[df_f["Nombre de la cuenta"].isin(cuenta)]
+if plan: df_f = df_f[df_f["Nombre del plan"].isin(plan)]
+if evento: df_f = df_f[df_f["Tipo de Evento"].isin(evento)]
 
 # ─────────────────────────────
 # KPIs
@@ -214,118 +167,43 @@ c2.metric("💲 Costo total", f"${costo_total:,.2f}")
 c3.metric("💲 Costo promedio", f"${costo_promedio:,.2f}")
 
 # ─────────────────────────────
-# GRÁFICOS EJECUTIVOS - LAYOUT 2x2
+# TENDENCIAS
 # ─────────────────────────────
-st.subheader("📊 Resumen Ejecutivo")
-
-# Crear columnas principales
-col1, col2 = st.columns(2)
-
-# ───────────────
-# 1️⃣ TOTAL ASISTENCIAS POR AÑO
-# ───────────────
-total_anual = (
-    df_f.groupby("AÑO")["Número Asistencia"]
-    .count()
-    .reset_index(name="Total Asistencias")
-)
-
-fig_total_asist = px.bar(
-    total_anual,
-    x="AÑO",
-    y="Total Asistencias",
-    text_auto=True,
-    title="Total Asistencias por Año"
-)
-
-col1.plotly_chart(fig_total_asist, use_container_width=True)
-
-# ───────────────
-# 2️⃣ ASISTENCIAS POR MES (AGRUPADAS)
-# ───────────────
-# Orden fijo meses
-orden_meses = ["Ene","Feb","Mar","Abr","May","Jun",
-               "Jul","Ago","Sep","Oct","Nov","Dic"]
-
-orden_anios = sorted(df_f["AÑO"].unique())
-
-# Orden fijo meses
-orden_meses = ["Ene","Feb","Mar","Abr","May","Jun",
-               "Jul","Ago","Sep","Oct","Nov","Dic"]
-
-orden_anios = sorted(df_f["AÑO"].unique())
+st.subheader("📈 Tendencias")
 
 asist_mes = (
     df_f.groupby(["AÑO", "MES_NOMBRE", "MES"])["Número Asistencia"]
     .count()
-    .reset_index(name="Total Asistencias")
+    .reset_index(name="Total asistencias")
+    .sort_values("MES")
 )
 
-fig_asist_mes = px.bar(
+fig1 = px.line(
     asist_mes,
     x="MES_NOMBRE",
-    y="Total Asistencias",
+    y="Total asistencias",
     color="AÑO",
-    barmode="group",
-    category_orders={
-        "MES_NOMBRE": orden_meses,
-        "AÑO": orden_anios
-    },
-    title="Asistencias por Mes"
+    title="Asistencias por mes"
 )
 
-fig_asist_mes.update_traces(opacity=1)
-
-col2.plotly_chart(fig_asist_mes, use_container_width=True)
-
-# Segunda fila
-col3, col4 = st.columns(2)
-
-# ───────────────
-# 3️⃣ TOTAL COSTO POR AÑO
-# ───────────────
-costo_anual = (
-    df_f.groupby("AÑO")["Total de Costo Global"]
-    .sum()
-    .reset_index(name="Total Costo")
-)
-
-fig_total_costo = px.bar(
-    costo_anual,
-    x="AÑO",
-    y="Total Costo",
-    text_auto=True,
-    title="Total Costo por Año"
-)
-
-col3.plotly_chart(fig_total_costo, use_container_width=True)
-
-# ───────────────
-# 4️⃣ COSTOS POR MES (AGRUPADAS)
-# ───────────────
+st.plotly_chart(fig1, use_container_width=True)
 
 costo_mes = (
     df_f.groupby(["AÑO", "MES_NOMBRE", "MES"])["Total de Costo Global"]
     .sum()
-    .reset_index(name="Total Costo")
+    .reset_index()
+    .sort_values("MES")
 )
 
-fig_costo_mes = px.bar(
+fig2 = px.line(
     costo_mes,
     x="MES_NOMBRE",
-    y="Total Costo",
+    y="Total de Costo Global",
     color="AÑO",
-    barmode="group",
-    category_orders={
-        "MES_NOMBRE": orden_meses,
-        "AÑO": orden_anios
-    },
-    title="Costos Mensual"
+    title="Costo mensual"
 )
 
-fig_costo_mes.update_traces(opacity=1)
-
-col4.plotly_chart(fig_costo_mes, use_container_width=True)
+st.plotly_chart(fig2, use_container_width=True)
 
 # ─────────────────────────────
 # TOPS
