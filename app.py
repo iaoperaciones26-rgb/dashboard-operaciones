@@ -150,10 +150,6 @@ proveedor = filtro_cascada("Proveedor", "Nombre del Proveedor")
 if proveedor:
     df_temp = df_temp[df_temp["Nombre del Proveedor"].isin(proveedor)]
 
-pais = filtro_cascada("País", "País")
-if pais:
-    df_temp = df_temp[df_temp["País"].isin(pais)]
-
 provincia = filtro_cascada("Provincia", "Provincia")
 if provincia:
     df_temp = df_temp[df_temp["Provincia"].isin(provincia)]
