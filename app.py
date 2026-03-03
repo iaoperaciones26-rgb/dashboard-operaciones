@@ -141,12 +141,13 @@ df = procesar_datos(cargar_datos())
 st.sidebar.header("🎛️ Filtros")
 
 if st.sidebar.button("🔄 Reset filtros"):
-    keys = list(st.session_state.keys())  # ← copia segura
-    for key in keys:
-        if key.startswith("filtro_"):
-            st.session_state[key] = []
-    st.rerun()
 
+    for key in list(st.session_state):
+        if key.startswith("filtro_"):
+            del st.session_state[key]   # ← eliminar en vez de poner []
+
+    st.rerun()
+    
 df_temp = df.copy()
 
 def filtro_cascada(label, columna):
@@ -415,13 +416,9 @@ fig_pie.update_layout(height=400)
 col_pie.plotly_chart(fig_pie, use_container_width=True)
 
 # CANCELACIONES
-df_cancelados = df_f[
-    df_f["Estado de Asistencia"].isin(
-        ["Cancelado posterior", "Cancelado al momento"]
-    )
-].copy()
-
-if not df_cancelados.empty:
+if not df_cancelados.empty and \
+   "Motivo Cancelacion" in df_cancelados.columns and \
+   "Submotivo Cancelacion" in df_cancelados.columns:
 
     df_cancelados["Motivo_Completo"] = (
         df_cancelados["Motivo Cancelacion"].fillna("").astype(str)
@@ -433,6 +430,34 @@ if not df_cancelados.empty:
         df_cancelados["Motivo_Completo"]
         .str.replace(" - $", "", regex=True)
     )
+
+    top_cancelaciones = (
+        df_cancelados.groupby("Motivo_Completo")["Número Asistencia"]
+        .count()
+        .reset_index(name="Total")
+        .sort_values("Total", ascending=False)
+        .head(10)
+    )
+
+    fig_cancel = px.bar(
+        top_cancelaciones.sort_values("Total"),
+        x="Total",
+        y="Motivo_Completo",
+        orientation="h",
+        text_auto=True,
+        color_discrete_sequence=["#8B1E1E"]
+    )
+
+    fig_cancel.update_layout(
+        height=400,
+        yaxis_title="",
+        xaxis_title="Cantidad"
+    )
+
+    col_cancel.plotly_chart(fig_cancel, use_container_width=True)
+
+else:
+    col_cancel.info("No existen cancelaciones para los filtros seleccionados.")
 
     top_cancelaciones = (
         df_cancelados.groupby("Motivo_Completo")["Número Asistencia"]
