@@ -1,4 +1,4 @@
-import streamlit as st
+import streamlit as st 
 import pandas as pd
 import plotly.express as px
 import gdown
@@ -75,7 +75,6 @@ df = df.dropna(subset=[fecha_col])
 df["AÑO"] = df[fecha_col].dt.year
 df["MES"] = df[fecha_col].dt.month
 
-# Diccionario meses abreviados
 meses_dict = {
     1: "Ene", 2: "Feb", 3: "Mar", 4: "Abr",
     5: "May", 6: "Jun", 7: "Jul", 8: "Ago",
@@ -97,9 +96,8 @@ df["Total de Costo Global"] = (
 )
 
 # ─────────────────────────────
-# FILTROS DEPENDIENTES (CASCADA)
+# FILTROS DEPENDIENTES
 # ─────────────────────────────
-
 st.sidebar.header("🎛️ Filtros")
 
 df_temp = df.copy()
@@ -107,72 +105,58 @@ df_temp = df.copy()
 def filtro_cascada(label, columna):
     opciones = sorted(df_temp[columna].dropna().unique())
     seleccion = st.sidebar.multiselect(label, opciones)
-
     if seleccion:
         return seleccion
     return []
 
-# Año
 anio = filtro_cascada("Año", "AÑO")
 if anio:
     df_temp = df_temp[df_temp["AÑO"].isin(anio)]
 
-# Mes
 mes_nombre = filtro_cascada("Mes", "MES_NOMBRE")
 if mes_nombre:
     df_temp = df_temp[df_temp["MES_NOMBRE"].isin(mes_nombre)]
 
-# Grupo
 grupo = filtro_cascada("Grupo de Servicio", "Grupo de Servicio")
 if grupo:
     df_temp = df_temp[df_temp["Grupo de Servicio"].isin(grupo)]
 
-# Servicio
 servicio = filtro_cascada("Nombre del Servicio", "Nombre del Servicio")
 if servicio:
     df_temp = df_temp[df_temp["Nombre del Servicio"].isin(servicio)]
 
-# Subservicio
 subservicio = filtro_cascada("Subservicio", "Nombre del Subservicio")
 if subservicio:
     df_temp = df_temp[df_temp["Nombre del Subservicio"].isin(subservicio)]
 
-# Estado
 estado = filtro_cascada("Estado de Asistencia", "Estado de Asistencia")
 if estado:
     df_temp = df_temp[df_temp["Estado de Asistencia"].isin(estado)]
 
-# Canal
 canal = filtro_cascada("Canal Origen", "Canal Origen")
 if canal:
     df_temp = df_temp[df_temp["Canal Origen"].isin(canal)]
 
-# Especialidad
 especialidad = filtro_cascada("Especialidad Médica", "ESPECIALIDAD MEDICA (CITAS)")
 if especialidad:
     df_temp = df_temp[df_temp["ESPECIALIDAD MEDICA (CITAS)"].isin(especialidad)]
 
-# Proveedor
 proveedor = filtro_cascada("Proveedor", "Nombre del Proveedor")
 if proveedor:
     df_temp = df_temp[df_temp["Nombre del Proveedor"].isin(proveedor)]
 
-# País
 pais = filtro_cascada("País", "País")
 if pais:
     df_temp = df_temp[df_temp["País"].isin(pais)]
 
-# Provincia
 provincia = filtro_cascada("Provincia", "Provincia")
 if provincia:
     df_temp = df_temp[df_temp["Provincia"].isin(provincia)]
 
-# Ciudad
 ciudad = filtro_cascada("Ciudad", "Ciudad")
 if ciudad:
     df_temp = df_temp[df_temp["Ciudad"].isin(ciudad)]
 
-# Otros
 local_foraneo = filtro_cascada("Local / Foráneo", "Local_Foráneo")
 if local_foraneo:
     df_temp = df_temp[df_temp["Local_Foráneo"].isin(local_foraneo)]
@@ -214,16 +198,17 @@ c2.metric("💲 Costo total", f"${costo_total:,.2f}")
 c3.metric("💲 Costo promedio", f"${costo_promedio:,.2f}")
 
 # ─────────────────────────────
-# GRÁFICOS EJECUTIVOS - LAYOUT 2x2
+# GRÁFICOS EJECUTIVOS
 # ─────────────────────────────
 st.subheader("📊 Resumen Ejecutivo")
 
-# Crear columnas principales
 col1, col2 = st.columns(2)
 
-# ───────────────
-# 1️⃣ TOTAL ASISTENCIAS POR AÑO
-# ───────────────
+orden_meses = ["Ene","Feb","Mar","Abr","May","Jun",
+               "Jul","Ago","Sep","Oct","Nov","Dic"]
+orden_anios = sorted(df_f["AÑO"].unique())
+
+# TOTAL ASISTENCIAS POR AÑO
 total_anual = (
     df_f.groupby("AÑO")["Número Asistencia"]
     .count()
@@ -238,23 +223,10 @@ fig_total_asist = px.bar(
     title="Total Asistencias por Año"
 )
 
+fig_total_asist.update_layout(yaxis_title=None)
 col1.plotly_chart(fig_total_asist, use_container_width=True)
 
-# ───────────────
-# 2️⃣ ASISTENCIAS POR MES (AGRUPADAS)
-# ───────────────
-# Orden fijo meses
-orden_meses = ["Ene","Feb","Mar","Abr","May","Jun",
-               "Jul","Ago","Sep","Oct","Nov","Dic"]
-
-orden_anios = sorted(df_f["AÑO"].unique())
-
-# Orden fijo meses
-orden_meses = ["Ene","Feb","Mar","Abr","May","Jun",
-               "Jul","Ago","Sep","Oct","Nov","Dic"]
-
-orden_anios = sorted(df_f["AÑO"].unique())
-
+# ASISTENCIAS POR MES
 asist_mes = (
     df_f.groupby(["AÑO", "MES_NOMBRE", "MES"])["Número Asistencia"]
     .count()
@@ -274,6 +246,7 @@ fig_asist_mes = px.bar(
     title="Asistencias por Mes"
 )
 
+fig_asist_mes.update_layout(yaxis_title=None)
 fig_asist_mes.update_traces(opacity=1)
 
 col2.plotly_chart(fig_asist_mes, use_container_width=True)
@@ -281,9 +254,7 @@ col2.plotly_chart(fig_asist_mes, use_container_width=True)
 # Segunda fila
 col3, col4 = st.columns(2)
 
-# ───────────────
-# 3️⃣ TOTAL COSTO POR AÑO
-# ───────────────
+# TOTAL COSTO POR AÑO
 costo_anual = (
     df_f.groupby("AÑO")["Total de Costo Global"]
     .sum()
@@ -298,12 +269,12 @@ fig_total_costo = px.bar(
     title="Total Costo por Año"
 )
 
+fig_total_costo.update_layout(yaxis_title=None)
+fig_total_costo.update_yaxes(tickprefix="$")
+
 col3.plotly_chart(fig_total_costo, use_container_width=True)
 
-# ───────────────
-# 4️⃣ COSTOS POR MES (AGRUPADAS)
-# ───────────────
-
+# COSTOS POR MES
 costo_mes = (
     df_f.groupby(["AÑO", "MES_NOMBRE", "MES"])["Total de Costo Global"]
     .sum()
@@ -323,6 +294,8 @@ fig_costo_mes = px.bar(
     title="Costos Mensual"
 )
 
+fig_costo_mes.update_layout(yaxis_title=None)
+fig_costo_mes.update_yaxes(tickprefix="$")
 fig_costo_mes.update_traces(opacity=1)
 
 col4.plotly_chart(fig_costo_mes, use_container_width=True)
@@ -343,6 +316,7 @@ top_servicios = (
 )
 
 fig_serv = px.bar(top_servicios, x="Nombre del Servicio", y="Total asistencias")
+fig_serv.update_layout(yaxis_title=None)
 col_a.plotly_chart(fig_serv, use_container_width=True)
 
 top_especialidad = (
@@ -354,9 +328,11 @@ top_especialidad = (
 )
 
 fig_esp = px.bar(top_especialidad, x="ESPECIALIDAD MEDICA (CITAS)", y="Total asistencias")
+fig_esp.update_layout(yaxis_title=None)
 col_b.plotly_chart(fig_esp, use_container_width=True)
+
 # ─────────────────────────────
-# TABLA ESTADO POR MES
+# TABLA
 # ─────────────────────────────
 st.subheader("📋 Estado de Asistencia por Mes")
 
@@ -383,5 +359,11 @@ estado_totales = (
     .reset_index()
 )
 
-fig_pie = px.pie(estado_totales, names="Estado de Asistencia", values="Número Asistencia", hole=0.4)
+fig_pie = px.pie(
+    estado_totales,
+    names="Estado de Asistencia",
+    values="Número Asistencia",
+    hole=0.4
+)
+
 st.plotly_chart(fig_pie, use_container_width=True)
