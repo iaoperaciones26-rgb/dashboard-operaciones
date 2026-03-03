@@ -71,19 +71,29 @@ st.write("Total filas cargadas (antes de procesar fecha):", len(df))
 # ─────────────────────────────
 # PROCESAMIENTO FECHA
 # ─────────────────────────────
+
 fecha_col = [c for c in df.columns if "fecha" in c.lower() and "asistencia" in c.lower()][0]
 
-df[fecha_col] = pd.to_datetime(df[fecha_col], errors="coerce")
+# 🔥 Conversión correcta (formato latino)
+df[fecha_col] = pd.to_datetime(
+    df[fecha_col],
+    dayfirst=True,
+    errors="coerce"
+)
 
+# 🔎 Test temporal (puedes eliminar luego)
 st.write("Filas después de convertir fecha:", len(df))
 
+# Eliminar solo fechas realmente inválidas
 df = df.dropna(subset=[fecha_col])
 
 st.write("Filas después de eliminar fechas inválidas:", len(df))
 
+# Crear Año y Mes
 df["AÑO"] = df[fecha_col].dt.year
 df["MES"] = df[fecha_col].dt.month
 
+# Diccionario meses abreviados
 meses_dict = {
     1: "Ene", 2: "Feb", 3: "Mar", 4: "Abr",
     5: "May", 6: "Jun", 7: "Jul", 8: "Ago",
