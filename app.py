@@ -245,6 +245,31 @@ fig_asist_mes = px.bar(
     category_orders={"MES_NOMBRE": orden_meses, "AÑO": orden_anios}
 )
 
+col2.plotly_chart(fig_asist_mes, use_container_width=True)
+
+col3, col4 = st.columns(2)
+
+costo_anual = df_f.groupby("AÑO")["Total de Costo Global"].sum().reset_index(name="Total Costo")
+
+fig_total_costo = px.bar(costo_anual, x="AÑO", y="Total Costo", text_auto=True)
+fig_total_costo.update_yaxes(tickprefix="$")
+col3.plotly_chart(fig_total_costo, use_container_width=True)
+
+costo_mes = df_f.groupby(["AÑO","MES_NOMBRE","MES"])["Total de Costo Global"].sum().reset_index(name="Total Costo")
+
+fig_costo_mes = px.bar(
+    costo_mes,
+    x="MES_NOMBRE",
+    y="Total Costo",
+    color="AÑO",
+    barmode="group",
+    category_orders={"MES_NOMBRE": orden_meses, "AÑO": orden_anios}
+)
+
+fig_costo_mes.update_yaxes(tickprefix="$")
+col4.plotly_chart(fig_costo_mes, use_container_width=True)
+
+
 # ─────────────────────────────
 # TOPS
 # ─────────────────────────────
