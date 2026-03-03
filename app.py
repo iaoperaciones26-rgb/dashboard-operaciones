@@ -214,9 +214,12 @@ c2.metric("💲 Costo total", f"${costo_total:,.2f}")
 c3.metric("💲 Costo promedio", f"${costo_promedio:,.2f}")
 
 # ─────────────────────────────
-# GRÁFICOS EJECUTIVOS
+# GRÁFICOS EJECUTIVOS - LAYOUT 2x2
 # ─────────────────────────────
 st.subheader("📊 Resumen Ejecutivo")
+
+# Crear columnas principales
+col1, col2 = st.columns(2)
 
 # ───────────────
 # 1️⃣ TOTAL ASISTENCIAS POR AÑO
@@ -235,10 +238,34 @@ fig_total_asist = px.bar(
     title="Total Asistencias por Año"
 )
 
-st.plotly_chart(fig_total_asist, use_container_width=True)
+col1.plotly_chart(fig_total_asist, use_container_width=True)
 
 # ───────────────
-# 2️⃣ TOTAL COSTO POR AÑO
+# 2️⃣ ASISTENCIAS POR MES (AGRUPADAS)
+# ───────────────
+asist_mes = (
+    df_f.groupby(["AÑO", "MES_NOMBRE", "MES"])["Número Asistencia"]
+    .count()
+    .reset_index(name="Total Asistencias")
+    .sort_values("MES")
+)
+
+fig_asist_mes = px.bar(
+    asist_mes,
+    x="MES_NOMBRE",
+    y="Total Asistencias",
+    color="AÑO",
+    barmode="group",   # 👈 AGRUPADAS
+    title="Asistencias por Mes"
+)
+
+col2.plotly_chart(fig_asist_mes, use_container_width=True)
+
+# Segunda fila
+col3, col4 = st.columns(2)
+
+# ───────────────
+# 3️⃣ TOTAL COSTO POR AÑO
 # ───────────────
 costo_anual = (
     df_f.groupby("AÑO")["Total de Costo Global"]
@@ -254,31 +281,10 @@ fig_total_costo = px.bar(
     title="Total Costo por Año"
 )
 
-st.plotly_chart(fig_total_costo, use_container_width=True)
+col3.plotly_chart(fig_total_costo, use_container_width=True)
 
 # ───────────────
-# 3️⃣ ASISTENCIAS POR MES (AGRUPADO)
-# ───────────────
-asist_mes = (
-    df_f.groupby(["AÑO", "MES_NOMBRE", "MES"])["Número Asistencia"]
-    .count()
-    .reset_index(name="Total Asistencias")
-    .sort_values("MES")
-)
-
-fig_asist_mes = px.bar(
-    asist_mes,
-    x="MES_NOMBRE",
-    y="Total Asistencias",
-    color="AÑO",
-    barmode="group",
-    title="Asistencias por Mes"
-)
-
-st.plotly_chart(fig_asist_mes, use_container_width=True)
-
-# ───────────────
-# 4️⃣ COSTOS POR MES (AGRUPADO)
+# 4️⃣ COSTOS POR MES (AGRUPADAS)
 # ───────────────
 costo_mes = (
     df_f.groupby(["AÑO", "MES_NOMBRE", "MES"])["Total de Costo Global"]
@@ -292,11 +298,11 @@ fig_costo_mes = px.bar(
     x="MES_NOMBRE",
     y="Total Costo",
     color="AÑO",
-    barmode="group",
+    barmode="group",   # 👈 AGRUPADAS
     title="Costos Mensual"
 )
 
-st.plotly_chart(fig_costo_mes, use_container_width=True)
+col4.plotly_chart(fig_costo_mes, use_container_width=True)
 
 # ─────────────────────────────
 # TOPS
