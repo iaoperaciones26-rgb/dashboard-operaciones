@@ -310,11 +310,17 @@ fig_asist_mes = px.bar(
     asist_mes,
     x="MES_NOMBRE",
     y="Total Asistencias",
-    color="AÑO",
+    color=asist_mes["AÑO"].astype(str),  # ← convertir a texto
     barmode="group",
-    category_orders={"MES_NOMBRE": orden_meses}
+    category_orders={
+        "MES_NOMBRE": orden_meses,
+        "color": sorted(asist_mes["AÑO"].astype(str).unique())
+    }
 )
 
+fig_asist_mes.update_layout(
+    legend_title_text="AÑO"
+)
 col2.plotly_chart(fig_asist_mes, use_container_width=True)
 
 # ─────────────────────────────
