@@ -316,3 +316,94 @@ fig_asist_mes = px.bar(
 )
 
 col2.plotly_chart(fig_asist_mes, use_container_width=True)
+
+# ─────────────────────────────
+# TOPS
+# ─────────────────────────────
+
+st.subheader("🏆 Top servicios y especialidades")
+
+col_a, col_b = st.columns(2)
+
+top_servicios = (
+    df_f.groupby("Nombre del Servicio")["Número Asistencia"]
+    .count()
+    .reset_index(name="Total")
+    .sort_values("Total", ascending=False)
+    .head(10)
+)
+
+fig_top_servicios = px.bar(
+    top_servicios,
+    x="Nombre del Servicio",
+    y="Total"
+)
+
+col_a.plotly_chart(fig_top_servicios, use_container_width=True)
+
+
+top_especialidad = (
+    df_f.groupby("ESPECIALIDAD MEDICA (CITAS)")["Número Asistencia"]
+    .count()
+    .reset_index(name="Total")
+    .sort_values("Total", ascending=False)
+    .head(10)
+)
+
+fig_top_especialidad = px.bar(
+    top_especialidad,
+    x="ESPECIALIDAD MEDICA (CITAS)",
+    y="Total"
+)
+
+col_b.plotly_chart(fig_top_especialidad, use_container_width=True)
+
+# ─────────────────────────────
+# TABLA
+# ─────────────────────────────
+
+st.subheader("📋 Estado de Asistencia por Mes")
+
+tabla_estado = (
+    df_f
+    .groupby(["Estado de Asistencia", "MES_NOMBRE"])["Número Asistencia"]
+    .count()
+    .reset_index()
+)
+
+orden_meses = ["Ene","Feb","Mar","Abr","May","Jun",
+               "Jul","Ago","Sep","Oct","Nov","Dic"]
+
+tabla_estado = tabla_estado.pivot(
+    index="Estado de Asistencia",
+    columns="MES_NOMBRE",
+    values="Número Asistencia"
+)
+
+tabla_estado = tabla_estado.reindex(columns=orden_meses)
+tabla_estado = tabla_estado.fillna(0).astype(int)
+
+tabla_estado["Total general"] = tabla_estado.sum(axis=1)
+tabla_estado = tabla_estado.sort_values("Total general", ascending=False)
+
+st.dataframe(tabla_estado, use_container_width=True)
+# ─────────────────────────────
+# PIE
+# ─────────────────────────────
+
+st.subheader("🥧 % Estado de Asistencia")
+
+estado_totales = (
+    df_f.groupby("Estado de Asistencia")["Número Asistencia"]
+    .count()
+    .reset_index()
+)
+
+fig_pie = px.pie(
+    estado_totales,
+    names="Estado de Asistencia",
+    values="Número Asistencia",
+    hole=0.4
+)
+
+st.plotly_chart(fig_pie, use_container_width=True)
