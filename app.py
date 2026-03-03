@@ -192,15 +192,10 @@ def filtro_cascada(label, columna):
     opciones = sorted(df_temp[columna].dropna().unique())
     key_name = f"filtro_{columna}"
 
-    # Inicializar si no existe
-    if key_name not in st.session_state:
-        st.session_state[key_name] = []
-
     seleccion = st.sidebar.multiselect(
         label,
         opciones,
-        key=key_name,
-        default=st.session_state[key_name]
+        key=key_name
     )
 
     return seleccion
