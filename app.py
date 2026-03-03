@@ -375,7 +375,7 @@ filas = len(tabla_estado)
 altura_tabla = 70 + (filas * 35)
 
 st.dataframe(
-    tabla_estado,
+    tabla_estado.style.format("{:,.0f}"),
     use_container_width=True,
     height=altura_tabla
 )
