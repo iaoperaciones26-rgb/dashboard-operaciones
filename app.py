@@ -5,12 +5,15 @@ import gdown
 import os
 
 # ─────────────────────────────
-# CONFIGURACIÓN
+# CONFIGURACIÓN GENERAL
 # ─────────────────────────────
-st.set_page_config(page_title="Dashboard Operaciones GEA", layout="wide")
+st.set_page_config(
+    page_title="Dashboard Operaciones GEA",
+    layout="wide"
+)
 
 # ─────────────────────────────
-# LOGIN
+# CONTRASEÑA ÚNICA
 # ─────────────────────────────
 PASSWORD = "OperacionesGEA"
 
@@ -30,7 +33,7 @@ if not st.session_state.authenticated:
     st.stop()
 
 # ─────────────────────────────
-# CARGA DE DATOS
+# CARGA DE DATOS DESDE DRIVE
 # ─────────────────────────────
 @st.cache_data(show_spinner=True)
 def cargar_datos():
@@ -59,14 +62,21 @@ def cargar_datos():
 
     return df
 
+
 df = cargar_datos()
 
 # ─────────────────────────────
 # PROCESAMIENTO FECHA
 # ─────────────────────────────
+
 fecha_col = [c for c in df.columns if "fecha" in c.lower() and "asistencia" in c.lower()][0]
 
-df[fecha_col] = pd.to_datetime(df[fecha_col], dayfirst=True, errors="coerce")
+df[fecha_col] = pd.to_datetime(
+    df[fecha_col],
+    dayfirst=True,
+    errors="coerce"
+)
+
 df = df.dropna(subset=[fecha_col])
 
 df["AÑO"] = df[fecha_col].dt.year
@@ -91,79 +101,94 @@ df["Total de Costo Global"] = (
 )
 
 # ─────────────────────────────
-# FILTROS (QUITADOS AÑO, MES, PAÍS)
+# FILTROS DEPENDIENTES
 # ─────────────────────────────
+
 st.sidebar.header("🎛️ Filtros")
 
 df_temp = df.copy()
 
-def filtro(label, columna):
+def filtro_cascada(label, columna):
     opciones = sorted(df_temp[columna].dropna().unique())
     seleccion = st.sidebar.multiselect(label, opciones)
     return seleccion
 
-grupo = filtro("Grupo de Servicio", "Grupo de Servicio")
+# Filtros completos
+anio = filtro_cascada("Año", "AÑO")
+if anio:
+    df_temp = df_temp[df_temp["AÑO"].isin(anio)]
+
+mes_nombre = filtro_cascada("Mes", "MES_NOMBRE")
+if mes_nombre:
+    df_temp = df_temp[df_temp["MES_NOMBRE"].isin(mes_nombre)]
+
+grupo = filtro_cascada("Grupo de Servicio", "Grupo de Servicio")
 if grupo:
     df_temp = df_temp[df_temp["Grupo de Servicio"].isin(grupo)]
 
-servicio = filtro("Nombre del Servicio", "Nombre del Servicio")
+servicio = filtro_cascada("Nombre del Servicio", "Nombre del Servicio")
 if servicio:
     df_temp = df_temp[df_temp["Nombre del Servicio"].isin(servicio)]
 
-subservicio = filtro("Subservicio", "Nombre del Subservicio")
+subservicio = filtro_cascada("Subservicio", "Nombre del Subservicio")
 if subservicio:
     df_temp = df_temp[df_temp["Nombre del Subservicio"].isin(subservicio)]
 
-estado = filtro("Estado de Asistencia", "Estado de Asistencia")
+estado = filtro_cascada("Estado de Asistencia", "Estado de Asistencia")
 if estado:
     df_temp = df_temp[df_temp["Estado de Asistencia"].isin(estado)]
 
-canal = filtro("Canal Origen", "Canal Origen")
+canal = filtro_cascada("Canal Origen", "Canal Origen")
 if canal:
     df_temp = df_temp[df_temp["Canal Origen"].isin(canal)]
 
-especialidad = filtro("Especialidad Médica", "ESPECIALIDAD MEDICA (CITAS)")
+especialidad = filtro_cascada("Especialidad Médica", "ESPECIALIDAD MEDICA (CITAS)")
 if especialidad:
     df_temp = df_temp[df_temp["ESPECIALIDAD MEDICA (CITAS)"].isin(especialidad)]
 
-proveedor = filtro("Proveedor", "Nombre del Proveedor")
+proveedor = filtro_cascada("Proveedor", "Nombre del Proveedor")
 if proveedor:
     df_temp = df_temp[df_temp["Nombre del Proveedor"].isin(proveedor)]
 
-provincia = filtro("Provincia", "Provincia")
+pais = filtro_cascada("País", "País")
+if pais:
+    df_temp = df_temp[df_temp["País"].isin(pais)]
+
+provincia = filtro_cascada("Provincia", "Provincia")
 if provincia:
     df_temp = df_temp[df_temp["Provincia"].isin(provincia)]
 
-ciudad = filtro("Ciudad", "Ciudad")
+ciudad = filtro_cascada("Ciudad", "Ciudad")
 if ciudad:
     df_temp = df_temp[df_temp["Ciudad"].isin(ciudad)]
 
-local_foraneo = filtro("Local / Foráneo", "Local_Foráneo")
+local_foraneo = filtro_cascada("Local / Foráneo", "Local_Foráneo")
 if local_foraneo:
     df_temp = df_temp[df_temp["Local_Foráneo"].isin(local_foraneo)]
 
-tipo_cliente = filtro("Tipo de Cliente", "TIPO DE CLIENTE")
+tipo_cliente = filtro_cascada("Tipo de Cliente", "TIPO DE CLIENTE")
 if tipo_cliente:
     df_temp = df_temp[df_temp["TIPO DE CLIENTE"].isin(tipo_cliente)]
 
-cliente = filtro("Cliente Institucional", "Cliente Institucional")
+cliente = filtro_cascada("Cliente Institucional", "Cliente Institucional")
 if cliente:
     df_temp = df_temp[df_temp["Cliente Institucional"].isin(cliente)]
 
-cuenta = filtro("Nombre de la cuenta", "Nombre de la cuenta")
+cuenta = filtro_cascada("Nombre de la cuenta", "Nombre de la cuenta")
 if cuenta:
     df_temp = df_temp[df_temp["Nombre de la cuenta"].isin(cuenta)]
 
-plan = filtro("Nombre del plan", "Nombre del plan")
+plan = filtro_cascada("Nombre del plan", "Nombre del plan")
 if plan:
     df_temp = df_temp[df_temp["Nombre del plan"].isin(plan)]
 
-evento = filtro("Tipo de Evento", "Tipo de Evento")
+evento = filtro_cascada("Tipo de Evento", "Tipo de Evento")
 if evento:
     df_temp = df_temp[df_temp["Tipo de Evento"].isin(evento)]
 
 df_f = df_temp.copy()
 
+# 🔒 Protección anti-crash
 if df_f.empty:
     st.warning("No hay datos con los filtros seleccionados.")
     st.stop()
@@ -171,10 +196,20 @@ if df_f.empty:
 # ─────────────────────────────
 # KPIs
 # ─────────────────────────────
+
 st.title("📊 Dashboard Operaciones GEA")
 
-total_asistencias = df_f["Número Asistencia"].count()
-costo_total = df_f["Total de Costo Global"].sum()
+filtros_activos = any([
+    anio, mes_nombre, grupo, servicio, subservicio,
+    estado, canal, especialidad, proveedor,
+    pais, provincia, ciudad, local_foraneo,
+    tipo_cliente, cliente, cuenta, plan, evento
+])
+
+df_kpi = df if not filtros_activos else df_f
+
+total_asistencias = df_kpi["Número Asistencia"].count()
+costo_total = df_kpi["Total de Costo Global"].sum()
 costo_promedio = costo_total / total_asistencias if total_asistencias > 0 else 0
 
 c1, c2, c3 = st.columns(3)
@@ -183,34 +218,61 @@ c2.metric("💲 Costo total", f"${costo_total:,.2f}")
 c3.metric("💲 Costo promedio", f"${costo_promedio:,.2f}")
 
 # ─────────────────────────────
-# GRÁFICOS (QUITADOS COSTOS)
+# RESUMEN EJECUTIVO
 # ─────────────────────────────
+
 st.subheader("📊 Resumen Ejecutivo")
 
 col1, col2 = st.columns(2)
 
-# Total asistencias por año
-total_anual = df_f.groupby("AÑO")["Número Asistencia"].count().reset_index(name="Total")
-fig1 = px.bar(total_anual, x="AÑO", y="Total", text_auto=True, title="Total Asistencias por Año")
-col1.plotly_chart(fig1, use_container_width=True)
-
-# Asistencias por mes
 orden_meses = ["Ene","Feb","Mar","Abr","May","Jun",
                "Jul","Ago","Sep","Oct","Nov","Dic"]
+orden_anios = sorted(df_f["AÑO"].unique())
 
-asist_mes = df_f.groupby(["MES_NOMBRE","MES"])["Número Asistencia"].count().reset_index(name="Total")
-fig2 = px.bar(
+total_anual = df_f.groupby("AÑO")["Número Asistencia"].count().reset_index(name="Total Asistencias")
+
+fig_total_asist = px.bar(total_anual, x="AÑO", y="Total Asistencias", text_auto=True)
+col1.plotly_chart(fig_total_asist, use_container_width=True)
+
+asist_mes = df_f.groupby(["AÑO","MES_NOMBRE","MES"])["Número Asistencia"].count().reset_index(name="Total Asistencias")
+
+fig_asist_mes = px.bar(
     asist_mes,
     x="MES_NOMBRE",
-    y="Total",
-    category_orders={"MES_NOMBRE": orden_meses},
-    title="Asistencias por Mes"
+    y="Total Asistencias",
+    color="AÑO",
+    barmode="group",
+    category_orders={"MES_NOMBRE": orden_meses, "AÑO": orden_anios}
 )
-col2.plotly_chart(fig2, use_container_width=True)
+
+col2.plotly_chart(fig_asist_mes, use_container_width=True)
+
+col3, col4 = st.columns(2)
+
+costo_anual = df_f.groupby("AÑO")["Total de Costo Global"].sum().reset_index(name="Total Costo")
+
+fig_total_costo = px.bar(costo_anual, x="AÑO", y="Total Costo", text_auto=True)
+fig_total_costo.update_yaxes(tickprefix="$")
+col3.plotly_chart(fig_total_costo, use_container_width=True)
+
+costo_mes = df_f.groupby(["AÑO","MES_NOMBRE","MES"])["Total de Costo Global"].sum().reset_index(name="Total Costo")
+
+fig_costo_mes = px.bar(
+    costo_mes,
+    x="MES_NOMBRE",
+    y="Total Costo",
+    color="AÑO",
+    barmode="group",
+    category_orders={"MES_NOMBRE": orden_meses, "AÑO": orden_anios}
+)
+
+fig_costo_mes.update_yaxes(tickprefix="$")
+col4.plotly_chart(fig_costo_mes, use_container_width=True)
 
 # ─────────────────────────────
 # TOPS
 # ─────────────────────────────
+
 st.subheader("🏆 Top servicios y especialidades")
 
 col_a, col_b = st.columns(2)
@@ -224,16 +286,24 @@ col_b.plotly_chart(px.bar(top_especialidad, x="ESPECIALIDAD MEDICA (CITAS)", y="
 # ─────────────────────────────
 # TABLA
 # ─────────────────────────────
+
 st.subheader("📋 Estado de Asistencia por Mes")
 
 tabla_estado = df_f.groupby(["Estado de Asistencia","MES"])["Número Asistencia"].count().reset_index().pivot(index="Estado de Asistencia", columns="MES", values="Número Asistencia").fillna(0).astype(int)
+
 tabla_estado["Total general"] = tabla_estado.sum(axis=1)
+
 st.dataframe(tabla_estado, use_container_width=True)
 
 # ─────────────────────────────
 # PIE
 # ─────────────────────────────
+
 st.subheader("🥧 % Estado de Asistencia")
 
 estado_totales = df_f.groupby("Estado de Asistencia")["Número Asistencia"].count().reset_index()
-st.plotly_chart(px.pie(estado_totales, names="Estado de Asistencia", values="Número Asistencia", hole=0.4), use_container_width=True)
+
+st.plotly_chart(
+    px.pie(estado_totales, names="Estado de Asistencia", values="Número Asistencia", hole=0.4),
+    use_container_width=True
+)
