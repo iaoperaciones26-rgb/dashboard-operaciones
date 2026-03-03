@@ -176,15 +176,26 @@ except Exception as e:
 
 st.sidebar.header("🎛️ Filtros")
 
+# Botón Reset Filtros
+if st.sidebar.button("🔄 Reset filtros"):
+    for key in list(st.session_state.keys()):
+        if key.startswith("filtro_"):
+            del st.session_state[key]
+    st.rerun()
+
 df_temp = df.copy()
 
 def filtro_cascada(label, columna):
     if columna not in df_temp.columns:
         return []
     opciones = sorted(df_temp[columna].dropna().unique())
-    seleccion = st.sidebar.multiselect(label, opciones)
+    seleccion = st.sidebar.multiselect(
+        label,
+        opciones,
+        key=f"filtro_{columna}"
+    )
     return seleccion
-
+    
 anio = filtro_cascada("Año", "AÑO")
 if anio:
     df_temp = df_temp[df_temp["AÑO"].isin(anio)]
