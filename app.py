@@ -274,9 +274,34 @@ col_b.plotly_chart(px.bar(top_especialidad, x="ESPECIALIDAD MEDICA (CITAS)", y="
 
 st.subheader("📋 Estado de Asistencia por Mes")
 
-tabla_estado = df_f.groupby(["Estado de Asistencia","MES"])["Número Asistencia"].count().reset_index().pivot(index="Estado de Asistencia", columns="MES", values="Número Asistencia").fillna(0).astype(int)
+# Crear tabla usando nombre del mes
+tabla_estado = (
+    df_f
+    .groupby(["Estado de Asistencia", "MES_NOMBRE"])["Número Asistencia"]
+    .count()
+    .reset_index()
+)
 
+# Orden correcto de meses
+orden_meses = ["Ene","Feb","Mar","Abr","May","Jun",
+               "Jul","Ago","Sep","Oct","Nov","Dic"]
+
+tabla_estado = tabla_estado.pivot(
+    index="Estado de Asistencia",
+    columns="MES_NOMBRE",
+    values="Número Asistencia"
+)
+
+# Reordenar columnas por mes
+tabla_estado = tabla_estado.reindex(columns=orden_meses)
+
+tabla_estado = tabla_estado.fillna(0).astype(int)
+
+# Calcular Total general
 tabla_estado["Total general"] = tabla_estado.sum(axis=1)
+
+# Ordenar de mayor a menor
+tabla_estado = tabla_estado.sort_values("Total general", ascending=False)
 
 st.dataframe(tabla_estado, use_container_width=True)
 
