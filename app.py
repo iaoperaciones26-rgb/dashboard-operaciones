@@ -33,7 +33,7 @@ if not st.session_state.authenticated:
     st.stop()
 
 # ─────────────────────────────
-# CARGA DE DATOS DESDE DRIVE
+# CARGA DE DATOS DESDE DRIVE (BLINDADA)
 # ─────────────────────────────
 @st.cache_data(show_spinner=True)
 def cargar_datos():
@@ -48,14 +48,22 @@ def cargar_datos():
     dfs = []
 
     for year, file_id in files.items():
-        url = f"https://drive.google.com/uc?id={file_id}"
-        output = f"/tmp/{year}.csv"
+        try:
+            url = f"https://drive.google.com/uc?id={file_id}"
+            output = f"/tmp/{year}.csv"
 
-        if not os.path.exists(output):
-            gdown.download(url, output, quiet=True)
+            if not os.path.exists(output):
+                gdown.download(url, output, quiet=True)
 
-        df_temp = pd.read_csv(output, encoding="latin1")
-        dfs.append(df_temp)
+            df_temp = pd.read_csv(output, encoding="latin1")
+            dfs.append(df_temp)
+
+        except Exception as e:
+            st.error(f"Error cargando archivo {year}: {e}")
+
+    if not dfs:
+        st.error("No se pudieron cargar los archivos.")
+        st.stop()
 
     df = pd.concat(dfs, ignore_index=True)
     df.columns = df.columns.str.replace('\ufeff', '', regex=False).str.strip()
@@ -63,13 +71,38 @@ def cargar_datos():
     return df
 
 
-df = cargar_datos()
+# Protección general
+try:
+    df = cargar_datos()
+except Exception as e:
+    st.error(f"Error general al cargar datos: {e}")
+    st.stop()
 
 # ─────────────────────────────
-# PROCESAMIENTO FECHA
+# VALIDACIÓN DE COLUMNAS CRÍTICAS
 # ─────────────────────────────
+columnas_necesarias = [
+    "Número Asistencia",
+    "Total de Costo Global"
+]
 
-fecha_col = [c for c in df.columns if "fecha" in c.lower() and "asistencia" in c.lower()][0]
+for col in columnas_necesarias:
+    if col not in df.columns:
+        st.error(f"No se encontró la columna obligatoria: {col}")
+        st.write("Columnas detectadas:", df.columns.tolist())
+        st.stop()
+
+# ─────────────────────────────
+# PROCESAMIENTO FECHA (PROTEGIDO)
+# ─────────────────────────────
+fecha_cols = [c for c in df.columns if "fecha" in c.lower() and "asistencia" in c.lower()]
+
+if not fecha_cols:
+    st.error("No se encontró la columna de fecha de asistencia.")
+    st.write("Columnas detectadas:", df.columns.tolist())
+    st.stop()
+
+fecha_col = fecha_cols[0]
 
 df[fecha_col] = pd.to_datetime(
     df[fecha_col],
@@ -97,23 +130,27 @@ df["Total de Costo Global"] = (
     .astype(str)
     .str.replace("$", "", regex=False)
     .str.replace(",", "", regex=False)
-    .astype(float)
 )
+
+df["Total de Costo Global"] = pd.to_numeric(
+    df["Total de Costo Global"],
+    errors="coerce"
+).fillna(0)
 
 # ─────────────────────────────
 # FILTROS DEPENDIENTES
 # ─────────────────────────────
-
 st.sidebar.header("🎛️ Filtros")
 
 df_temp = df.copy()
 
 def filtro_cascada(label, columna):
+    if columna not in df_temp.columns:
+        return []
     opciones = sorted(df_temp[columna].dropna().unique())
     seleccion = st.sidebar.multiselect(label, opciones)
     return seleccion
 
-# Filtros completos
 anio = filtro_cascada("Año", "AÑO")
 if anio:
     df_temp = df_temp[df_temp["AÑO"].isin(anio)]
@@ -149,9 +186,9 @@ if especialidad:
 proveedor = filtro_cascada("Proveedor", "Nombre del Proveedor")
 if proveedor:
     df_temp = df_temp[df_temp["Nombre del Proveedor"].isin(proveedor)]
-    
-pais = filtro_cascada("País", "País") 
-if pais: 
+
+pais = filtro_cascada("País", "País")
+if pais:
     df_temp = df_temp[df_temp["País"].isin(pais)]
 
 provincia = filtro_cascada("Provincia", "Provincia")
@@ -188,7 +225,6 @@ if evento:
 
 df_f = df_temp.copy()
 
-# 🔒 Protección anti-crash
 if df_f.empty:
     st.warning("No hay datos con los filtros seleccionados.")
     st.stop()
@@ -196,7 +232,6 @@ if df_f.empty:
 # ─────────────────────────────
 # KPIs
 # ─────────────────────────────
-
 st.title("📊 Dashboard Operaciones GEA")
 
 filtros_activos = any([
@@ -220,34 +255,27 @@ c3.metric("💲 Costo promedio", f"${costo_promedio:,.2f}")
 # ─────────────────────────────
 # RESUMEN EJECUTIVO
 # ─────────────────────────────
-
 st.subheader("📊 Resumen Ejecutivo")
 
 col1, col2 = st.columns(2)
 
 orden_meses = ["Ene","Feb","Mar","Abr","May","Jun",
                "Jul","Ago","Sep","Oct","Nov","Dic"]
-orden_anios = sorted(df_f["AÑO"].unique())
 
-# Total asistencias por año
 total_anual = df_f.groupby("AÑO")["Número Asistencia"].count().reset_index(name="Total Asistencias")
 
 fig_total_asist = px.bar(
     total_anual,
     x="AÑO",
     y="Total Asistencias",
-    text_auto=True,
-    category_orders={"AÑO": sorted(total_anual["AÑO"].unique())}
+    text_auto=True
 )
 
-fig_total_asist.update_layout(
-    xaxis_type="category"
-)
+fig_total_asist.update_layout(xaxis_type="category")
 
 col1.plotly_chart(fig_total_asist, use_container_width=True)
 
-# Asistencias por mes
-asist_mes = df_f.groupby(["AÑO","MES_NOMBRE","MES"])["Número Asistencia"].count().reset_index(name="Total Asistencias")
+asist_mes = df_f.groupby(["AÑO","MES_NOMBRE"])["Número Asistencia"].count().reset_index(name="Total Asistencias")
 
 fig_asist_mes = px.bar(
     asist_mes,
@@ -255,70 +283,7 @@ fig_asist_mes = px.bar(
     y="Total Asistencias",
     color="AÑO",
     barmode="group",
-    category_orders={"MES_NOMBRE": orden_meses, "AÑO": orden_anios}
+    category_orders={"MES_NOMBRE": orden_meses}
 )
 
 col2.plotly_chart(fig_asist_mes, use_container_width=True)
-# ─────────────────────────────
-# TOPS
-# ─────────────────────────────
-
-st.subheader("🏆 Top servicios y especialidades")
-
-col_a, col_b = st.columns(2)
-
-top_servicios = df_f.groupby("Nombre del Servicio")["Número Asistencia"].count().reset_index(name="Total").sort_values("Total", ascending=False).head(10)
-col_a.plotly_chart(px.bar(top_servicios, x="Nombre del Servicio", y="Total"), use_container_width=True)
-
-top_especialidad = df_f.groupby("ESPECIALIDAD MEDICA (CITAS)")["Número Asistencia"].count().reset_index(name="Total").sort_values("Total", ascending=False).head(10)
-col_b.plotly_chart(px.bar(top_especialidad, x="ESPECIALIDAD MEDICA (CITAS)", y="Total"), use_container_width=True)
-
-# ─────────────────────────────
-# TABLA
-# ─────────────────────────────
-
-st.subheader("📋 Estado de Asistencia por Mes")
-
-# Crear tabla usando nombre del mes
-tabla_estado = (
-    df_f
-    .groupby(["Estado de Asistencia", "MES_NOMBRE"])["Número Asistencia"]
-    .count()
-    .reset_index()
-)
-
-# Orden correcto de meses
-orden_meses = ["Ene","Feb","Mar","Abr","May","Jun",
-               "Jul","Ago","Sep","Oct","Nov","Dic"]
-
-tabla_estado = tabla_estado.pivot(
-    index="Estado de Asistencia",
-    columns="MES_NOMBRE",
-    values="Número Asistencia"
-)
-
-# Reordenar columnas por mes
-tabla_estado = tabla_estado.reindex(columns=orden_meses)
-
-tabla_estado = tabla_estado.fillna(0).astype(int)
-
-# Calcular Total general
-tabla_estado["Total general"] = tabla_estado.sum(axis=1)
-
-# Ordenar de mayor a menor
-tabla_estado = tabla_estado.sort_values("Total general", ascending=False)
-
-st.dataframe(tabla_estado, use_container_width=True)
-
-# ─────────────────────────────
-# PIE
-# ─────────────────────────────
-
-st.subheader("🥧 % Estado de Asistencia")
-
-estado_totales = df_f.groupby("Estado de Asistencia")["Número Asistencia"].count().reset_index()
-
-st.plotly_chart(
-    px.pie(estado_totales, names="Estado de Asistencia", values="Número Asistencia", hole=0.4),
-    use_container_width=True
-)
