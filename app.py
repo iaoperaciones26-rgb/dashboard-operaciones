@@ -140,21 +140,17 @@ df = procesar_datos(cargar_datos())
 # ─────────────────────────────
 st.sidebar.header("🎛️ Filtros")
 
-# Inicializar filtros aplicados
-if "filtros_aplicados" not in st.session_state:
-    st.session_state.filtros_aplicados = {}
-
-# Reset
 if st.sidebar.button("🔄 Reset filtros"):
-    st.session_state.filtros_aplicados = {}
+    for key in st.session_state.keys():
+        if key.startswith("filtro_"):
+            st.session_state[key] = []
     st.rerun()
 
 df_temp = df.copy()
 
-# ───── FILTROS DINÁMICOS (CASCADA)
 def filtro_cascada(label, columna):
     opciones = sorted(df_temp[columna].dropna().unique())
-    return st.sidebar.multiselect(label, opciones, key=f"ui_{columna}")
+    return st.sidebar.multiselect(label, opciones, key=f"filtro_{columna}")
 
 anio = filtro_cascada("Año", "AÑO")
 if anio:
@@ -228,41 +224,6 @@ evento = filtro_cascada("Tipo de Evento", "Tipo de Evento")
 if evento:
     df_temp = df_temp[df_temp["Tipo de Evento"].isin(evento)]
 
-# Botón aplicar
-if st.sidebar.button("Aplicar filtros"):
-    st.session_state.filtros_aplicados = {
-        "AÑO": anio,
-        "MES_NOMBRE": mes_nombre,
-        "Grupo de Servicio": grupo,
-        "Nombre del Servicio": servicio,
-        "Nombre del Subservicio": subservicio,
-        "Estado de Asistencia": estado,
-        "Canal Origen": canal,
-        "ESPECIALIDAD MEDICA (CITAS)": especialidad,
-        "Nombre del Proveedor": proveedor,
-        "País": pais,
-        "Provincia": provincia,
-        "Ciudad": ciudad,
-        "Local_Foráneo": local_foraneo,
-        "TIPO DE CLIENTE": tipo_cliente,
-        "Cliente Institucional": cliente,
-        "Nombre de la cuenta": cuenta,
-        "Nombre del plan": plan,
-        "Tipo de Evento": evento
-    }
-    st.rerun()
-
-# ───── APLICAR SOLO FILTROS CONFIRMADOS
-df_f = df.copy()
-
-for columna, valores in st.session_state.filtros_aplicados.items():
-    if valores:
-        df_f = df_f[df_f[columna].isin(valores)]
-
-if df_f.empty:
-    st.warning("No hay datos con los filtros seleccionados.")
-    st.stop()
-    
 df_f = df_temp.copy()
 
 if df_f.empty:
