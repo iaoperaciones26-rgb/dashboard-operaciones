@@ -391,11 +391,14 @@ tabla_estado = tabla_estado.sort_values("Total general", ascending=False)
 st.dataframe(tabla_estado, use_container_width=True)
 
 # ─────────────────────────────
-# PIE
+# PIE + CANCELACIONES
 # ─────────────────────────────
 
-st.subheader("🥧 % Estado de Asistencia")
+st.subheader("📊 Estado y Análisis de Cancelaciones")
 
+col_pie, col_cancel = st.columns([1, 1.4])  # Más espacio al gráfico horizontal
+
+# ───── PIE MÁS COMPACTO
 estado_totales = (
     df_f.groupby("Estado de Asistencia")["Número Asistencia"]
     .count()
@@ -406,7 +409,60 @@ fig_pie = px.pie(
     estado_totales,
     names="Estado de Asistencia",
     values="Número Asistencia",
-    hole=0.4
+    hole=0.5
 )
 
-st.plotly_chart(fig_pie, use_container_width=True)
+fig_pie.update_layout(
+    height=400,
+    showlegend=True
+)
+
+col_pie.plotly_chart(fig_pie, use_container_width=True)
+
+# ───── CANCELACIONES
+
+df_cancelados = df_f[
+    df_f["Estado de Asistencia"].isin(
+        ["Cancelado posterior", "Cancelado al momento"]
+    )
+]
+
+if not df_cancelados.empty:
+
+    # Crear columna combinada
+    df_cancelados["Motivo_Completo"] = (
+        df_cancelados["Motivo Cancelacion"].fillna("").astype(str)
+        + " - "
+        + df_cancelados["Submotivo Cancelacion"].fillna("").astype(str)
+    )
+
+    # Limpiar casos donde submotivo sea vacío
+    df_cancelados["Motivo_Completo"] = df_cancelados["Motivo_Completo"].str.replace(" - $", "", regex=True)
+
+    top_cancelaciones = (
+        df_cancelados
+        .groupby("Motivo_Completo")["Número Asistencia"]
+        .count()
+        .reset_index(name="Total")
+        .sort_values("Total", ascending=False)
+        .head(10)
+    )
+
+    fig_cancel = px.bar(
+        top_cancelaciones.sort_values("Total"),
+        x="Total",
+        y="Motivo_Completo",
+        orientation="h",
+        text_auto=True
+    )
+
+    fig_cancel.update_layout(
+        height=400,
+        yaxis_title="",
+        xaxis_title="Cantidad"
+    )
+
+    col_cancel.plotly_chart(fig_cancel, use_container_width=True)
+
+else:
+    col_cancel.info("No existen cancelaciones para los filtros seleccionados.")
