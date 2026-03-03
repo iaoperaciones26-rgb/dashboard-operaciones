@@ -249,21 +249,35 @@ orden_meses = ["Ene","Feb","Mar","Abr","May","Jun",
 
 orden_anios = sorted(df_f["AÑO"].unique())
 
+# Orden fijo meses
+orden_meses = ["Ene","Feb","Mar","Abr","May","Jun",
+               "Jul","Ago","Sep","Oct","Nov","Dic"]
+
+orden_anios = sorted(df_f["AÑO"].unique())
+
 asist_mes = (
-    df_f.groupby(["MES_NOMBRE", "MES"])["Número Asistencia"]
+    df_f.groupby(["AÑO", "MES_NOMBRE", "MES"])["Número Asistencia"]
     .count()
     .reset_index(name="Total Asistencias")
-    .sort_values("MES")
 )
 
 fig_asist_mes = px.bar(
     asist_mes,
     x="MES_NOMBRE",
     y="Total Asistencias",
-    title="Total Asistencias por Mes"
+    color="AÑO",
+    barmode="group",
+    category_orders={
+        "MES_NOMBRE": orden_meses,
+        "AÑO": orden_anios
+    },
+    title="Asistencias por Mes"
 )
 
+fig_asist_mes.update_traces(opacity=1)
+
 col2.plotly_chart(fig_asist_mes, use_container_width=True)
+
 # Segunda fila
 col3, col4 = st.columns(2)
 
@@ -291,18 +305,25 @@ col3.plotly_chart(fig_total_costo, use_container_width=True)
 # ───────────────
 
 costo_mes = (
-    df_f.groupby(["MES_NOMBRE", "MES"])["Total de Costo Global"]
+    df_f.groupby(["AÑO", "MES_NOMBRE", "MES"])["Total de Costo Global"]
     .sum()
     .reset_index(name="Total Costo")
-    .sort_values("MES")
 )
 
 fig_costo_mes = px.bar(
     costo_mes,
     x="MES_NOMBRE",
     y="Total Costo",
-    title="Total Costos por Mes"
+    color="AÑO",
+    barmode="group",
+    category_orders={
+        "MES_NOMBRE": orden_meses,
+        "AÑO": orden_anios
+    },
+    title="Costos Mensual"
 )
+
+fig_costo_mes.update_traces(opacity=1)
 
 col4.plotly_chart(fig_costo_mes, use_container_width=True)
 
