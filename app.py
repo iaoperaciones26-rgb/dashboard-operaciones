@@ -30,40 +30,41 @@ if tema:
     st.markdown("""
     <style>
 
-    /* Evita que Chrome fuerce dark mode */
-    :root {
-        color-scheme: dark;
-    }
-
-    /* Fondo general */
+    /* FONDO GENERAL */
     .stApp {
         background-color: #0B0F19;
-        color: #E5E7EB;
+        color: #E5E7EB !important;
     }
 
-    /* Sidebar */
+    /* SIDEBAR */
     section[data-testid="stSidebar"] {
         background-color: #0B0F19;
     }
 
-    /* Texto */
-    html, body, [class*="css"] {
+    /* TEXTO SIDEBAR */
+    section[data-testid="stSidebar"] * {
         color: #E5E7EB !important;
-    }
-
-    /* Títulos */
-    h1, h2, h3 {
-        color: #E5E7EB;
     }
 
     /* KPIs */
     [data-testid="metric-container"] {
         background-color: #1F2937;
-        border-radius: 8px;
+        border-radius: 10px;
         padding: 15px;
     }
 
-    /* tablas */
+    /* TEXTO KPIs */
+    [data-testid="metric-container"] label,
+    [data-testid="metric-container"] div {
+        color: white !important;
+    }
+
+    /* TITULOS */
+    h1, h2, h3 {
+        color: #E5E7EB !important;
+    }
+
+    /* TABLAS */
     .stDataFrame {
         background-color: #111827;
         color: #E5E7EB;
@@ -72,7 +73,6 @@ if tema:
     </style>
     """, unsafe_allow_html=True)
 
-    # plotly dark
     pio.templates.default = "plotly_dark"
 
 
@@ -81,30 +81,25 @@ else:
     st.markdown("""
     <style>
 
-    /* Evita que Chrome fuerce dark mode */
-    :root {
-        color-scheme: light;
-    }
-
-    /* Fondo general del dashboard */
+    /* FONDO GENERAL */
     .stApp {
         background-color: #F4F6F8;
-        color: #2C2C2C;
+        color: #1F2937 !important;
     }
 
-    /* Sidebar */
+    /* SIDEBAR */
     section[data-testid="stSidebar"] {
         background-color: #F8FAFC;
     }
 
-    /* Texto */
-    html, body, [class*="css"] {
-        color: #2C2C2C !important;
+    /* TEXTO SIDEBAR */
+    section[data-testid="stSidebar"] * {
+        color: #1F2937 !important;
     }
 
-    /* Títulos */
+    /* TITULOS */
     h1, h2, h3 {
-        color: #1F2E6D;
+        color: #1F2E6D !important;
         font-weight: 700;
     }
 
@@ -116,7 +111,13 @@ else:
         box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
 
-    /* CONTENEDOR DE GRÁFICOS */
+    /* TEXTO KPIs */
+    [data-testid="metric-container"] label,
+    [data-testid="metric-container"] div {
+        color: #1F2937 !important;
+    }
+
+    /* CONTENEDOR GRÁFICOS */
     div[data-testid="stPlotlyChart"] {
         background-color: white;
         padding: 18px;
@@ -129,6 +130,7 @@ else:
         background-color: white;
         border-radius: 10px;
         padding: 10px;
+        color: #1F2937;
     }
 
     </style>
