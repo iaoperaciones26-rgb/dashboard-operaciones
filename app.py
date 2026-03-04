@@ -216,6 +216,9 @@ df["CIUDAD_NORMALIZADA"] = df["Ciudad"].apply(normalizar_ciudad)
 # ─────────────────────────────
 
 cantones = pd.read_csv("data/cantones_ecuador.csv")
+# normalizar cantones del catálogo
+cantones["CANTON_NORMALIZADO"] = cantones["Cantón"].apply(normalizar_ciudad)
+
 # ───── NOMBRE BONITO PARA FILTROS
 cantones["CANTON_DISPLAY"] = (
     cantones["Cantón"]
