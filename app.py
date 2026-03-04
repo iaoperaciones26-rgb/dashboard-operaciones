@@ -30,6 +30,11 @@ if tema:
     st.markdown("""
     <style>
 
+    /* Evita que Chrome fuerce dark mode */
+    :root {
+        color-scheme: dark;
+    }
+
     /* Fondo general */
     .stApp {
         background-color: #0B0F19;
@@ -75,6 +80,11 @@ else:
 
     st.markdown("""
     <style>
+
+    /* Evita que Chrome fuerce dark mode */
+    :root {
+        color-scheme: light;
+    }
 
     /* Fondo general del dashboard */
     .stApp {
@@ -124,8 +134,7 @@ else:
     </style>
     """, unsafe_allow_html=True)
 
-pio.templates.default = "GEA"
-   
+    pio.templates.default = "GEA"
 # ─────────────────────────────
 # TEMPLATE CORPORATIVO PLOTLY
 # ─────────────────────────────
