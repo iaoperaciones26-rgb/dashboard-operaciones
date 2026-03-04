@@ -124,7 +124,7 @@ else:
     </style>
     """, unsafe_allow_html=True)
 
-    pio.templates.default = "GEA"
+   pio.templates["GEA"] = GEA_TEMPLATE
    
 # ─────────────────────────────
 # TEMPLATE CORPORATIVO PLOTLY
