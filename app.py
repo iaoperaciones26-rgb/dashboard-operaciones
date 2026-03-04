@@ -21,8 +21,8 @@ if "tema_oscuro" not in st.session_state:
     st.session_state.tema_oscuro = False
 
 tema = st.sidebar.toggle("🌙 Modo oscuro", value=st.session_state.tema_oscuro)
-st.session_state.tema_oscuro = tema
 
+st.session_state.tema_oscuro = tema
 
 if tema:
 
