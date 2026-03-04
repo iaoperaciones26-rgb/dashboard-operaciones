@@ -17,45 +17,59 @@ st.set_page_config(
 # ─────────────────────────────
 # ESTILO INSTITUCIONAL GEA
 # ─────────────────────────────
-st.markdown("""
-<style>
+if "tema_oscuro" not in st.session_state:
+    st.session_state.tema_oscuro = False
 
-/* Forzar modo claro aunque el navegador esté en dark mode */
-html {
-    color-scheme: light;
-}
+tema = st.sidebar.toggle("🌙 Modo oscuro", value=st.session_state.tema_oscuro)
+st.session_state.tema_oscuro = tema
 
-/* Fondo general */
-.stApp {
-    background-color: #F4F6F8;
-}
 
-/* Texto general */
-html, body, [class*="css"]  {
-    color: #2C2C2C !important;
-}
+if tema:
 
-/* Sidebar */
-section[data-testid="stSidebar"] {
-    background-color: #0E1117;
-}
+    st.markdown("""
+    <style>
 
-/* Títulos */
-h1, h2, h3 {
-    color: #1F2E6D;
-    font-weight: 700;
-}
+    .stApp {
+        background-color: #0E1117;
+        color: white;
+    }
 
-/* KPIs */
-[data-testid="metric-container"] {
-    background-color: white !important;
-    border-radius: 8px;
-    padding: 15px;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-}
+    h1, h2, h3 {
+        color: #E5E7EB;
+    }
 
-</style>
-""", unsafe_allow_html=True)
+    [data-testid="metric-container"] {
+        background-color: #1F2937;
+        border-radius: 8px;
+        padding: 15px;
+    }
+
+    </style>
+    """, unsafe_allow_html=True)
+
+else:
+
+    st.markdown("""
+    <style>
+
+    .stApp {
+        background-color: #F4F6F8;
+    }
+
+    h1, h2, h3 {
+        color: #1F2E6D;
+        font-weight: 700;
+    }
+
+    [data-testid="metric-container"] {
+        background-color: white;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+    }
+
+    </style>
+    """, unsafe_allow_html=True)
 # ─────────────────────────────
 # TEMPLATE CORPORATIVO PLOTLY
 # ─────────────────────────────
@@ -260,6 +274,8 @@ ciudad_map = dict(
 # ─────────────────────────────
 
 st.sidebar.header("🎛️ Filtros")
+
+tema = st.sidebar.toggle("🌙 Modo oscuro", value=False)
 
 if st.sidebar.button("🔄 Reset filtros"):
 
