@@ -56,7 +56,7 @@ if tema:
         color: #FFFFFF !important;
     }
 
- /* KPI CONTENEDOR */
+/* KPI CONTENEDOR */
 [data-testid="metric-container"]{
     background-color:#1F2937;
     border-radius:10px;
@@ -64,8 +64,9 @@ if tema:
 }
 
 /* TITULO KPI */
-[data-testid="metric-container"] label{
+[data-testid="stMetricLabel"]{
     color:#FFFFFF !important;
+    font-weight:500;
 }
 
 /* VALOR KPI */
@@ -136,8 +137,9 @@ else:
 }
 
 /* TITULO KPI */
-[data-testid="metric-container"] label{
+[data-testid="stMetricLabel"]{
     color:#1F2937 !important;
+    font-weight:500;
 }
 
 /* VALOR KPI */
