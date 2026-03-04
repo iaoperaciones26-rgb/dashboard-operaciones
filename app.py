@@ -197,9 +197,12 @@ df = load_all()
 st.sidebar.header("🎛️ Filtros")
 
 if st.sidebar.button("🔄 Reset filtros"):
-    for key in list(st.session_state):
-        if key.startswith("filtro_"):
-            del st.session_state[key]
+
+    filtros = [k for k in st.session_state.keys() if k.startswith("filtro_")]
+
+    for f in filtros:
+        del st.session_state[f]
+
     st.rerun()
 
 df_temp = df  # ← sin copy
