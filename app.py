@@ -151,6 +151,7 @@ GEA_TEMPLATE = dict(
 )
 
 pio.templates["GEA"] = GEA_TEMPLATE
+pio.templates.default = "GEA"
 
 # ─────────────────────────────
 # CONTRASEÑA
