@@ -75,13 +75,6 @@ if tema:
     font-weight:700;
 }
 
-    /* CONTENEDOR GRAFICOS */
-div[data-testid="stPlotlyChart"] {
-    background-color: white;
-    padding: 12px;
-    border-radius: 10px;
-}
-
     /* TABLAS */
     .stDataFrame {
         background-color: #111827;
@@ -146,13 +139,6 @@ else:
 [data-testid="stMetricValue"]{
     color:#000000 !important;
     font-weight:700;
-}
-
-  /* CONTENEDOR GRAFICOS */
-div[data-testid="stPlotlyChart"] {
-    background-color: transparent;
-    padding: 0px;
-    border-radius: 10px;
 }
 
     /* TABLAS */
