@@ -195,7 +195,7 @@ df = load_all()
 # CATÁLOGO DE CANTONES ECUADOR
 # ─────────────────────────────
 
-cantones = pd.read_csv("data/cantones_ecuador.csv")
+cantones = pd.read_csv("cantones_ecuador.csv")
 
 catalogo_ciudades = (
     cantones["Cantón"]
