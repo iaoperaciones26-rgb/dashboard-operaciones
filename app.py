@@ -17,6 +17,7 @@ st.set_page_config(
 # ─────────────────────────────
 # ESTILO INSTITUCIONAL GEA
 # ─────────────────────────────
+
 if "tema_oscuro" not in st.session_state:
     st.session_state.tema_oscuro = False
 
@@ -29,38 +30,75 @@ if tema:
     st.markdown("""
     <style>
 
+    /* Fondo general */
     .stApp {
         background-color: #0E1117;
-        color: white;
+        color: #E5E7EB;
     }
 
+    /* Sidebar */
+    section[data-testid="stSidebar"] {
+        background-color: #0E1117;
+    }
+
+    /* Texto */
+    html, body, [class*="css"] {
+        color: #E5E7EB !important;
+    }
+
+    /* Títulos */
     h1, h2, h3 {
         color: #E5E7EB;
     }
 
+    /* KPIs */
     [data-testid="metric-container"] {
         background-color: #1F2937;
         border-radius: 8px;
         padding: 15px;
     }
 
+    /* tablas */
+    .stDataFrame {
+        background-color: #111827;
+        color: #E5E7EB;
+    }
+
     </style>
     """, unsafe_allow_html=True)
+
+    # plotly dark
+    pio.templates.default = "plotly_dark"
+
 
 else:
 
     st.markdown("""
     <style>
 
+    /* Fondo general */
     .stApp {
         background-color: #F4F6F8;
+        color: #2C2C2C;
     }
 
+    /* Sidebar */
+    section[data-testid="stSidebar"] {
+        background-color: #0E1117;
+    }
+
+    /* Texto */
+    html, body, [class*="css"] {
+        color: #2C2C2C !important;
+    }
+
+    /* Títulos */
     h1, h2, h3 {
         color: #1F2E6D;
         font-weight: 700;
     }
 
+    /* KPIs */
     [data-testid="metric-container"] {
         background-color: white;
         border-radius: 8px;
@@ -70,6 +108,9 @@ else:
 
     </style>
     """, unsafe_allow_html=True)
+
+    # plotly claro
+    pio.templates.default = "GEA"
 # ─────────────────────────────
 # TEMPLATE CORPORATIVO PLOTLY
 # ─────────────────────────────
@@ -274,8 +315,6 @@ ciudad_map = dict(
 # ─────────────────────────────
 
 st.sidebar.header("🎛️ Filtros")
-
-tema = st.sidebar.toggle("🌙 Modo oscuro", value=False)
 
 if st.sidebar.button("🔄 Reset filtros"):
 
