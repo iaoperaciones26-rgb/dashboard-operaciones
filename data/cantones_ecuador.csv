@@ -1,54 +1,54 @@
-Provincia,Cantón
+Provincia,CantÃ³n
 Azuay,Cuenca
 Azuay,Chordeleg
 Azuay,El Pan
-Azuay,Girón
+Azuay,GirÃ³n
 Azuay,Guachapala
 Azuay,Gualaceo
-Azuay,Nabón
-Azuay,Oña
+Azuay,NabÃ³n
+Azuay,OÃ±a
 Azuay,Paute
-Azuay,Ponce Enríquez
+Azuay,Ponce EnrÃ­quez
 Azuay,San Fernando
 Azuay,Santa Isabel
 Azuay,Sevilla de Oro
-Azuay,Sígsig
-Bolívar,Guaranda
-Bolívar,Caluma
-Bolívar,Chillanes
-Bolívar,Chimbo
-Bolívar,Echeandía
-Bolívar,Las Naves
-Bolívar,San Miguel
-Cañar,Azogues
-Cañar,Biblián
-Cañar,Cañar
-Cañar,Déleg
-Cañar,El Tambo
-Cañar,La Troncal
-Cañar,Suscal
-Carchi,Tulcán
-Carchi,Bolívar
+Azuay,SÃ­gsig
+BolÃ­var,Guaranda
+BolÃ­var,Caluma
+BolÃ­var,Chillanes
+BolÃ­var,Chimbo
+BolÃ­var,EcheandÃ­a
+BolÃ­var,Las Naves
+BolÃ­var,San Miguel
+CaÃ±ar,Azogues
+CaÃ±ar,BibliÃ¡n
+CaÃ±ar,CaÃ±ar
+CaÃ±ar,DÃ©leg
+CaÃ±ar,El Tambo
+CaÃ±ar,La Troncal
+CaÃ±ar,Suscal
+Carchi,TulcÃ¡n
+Carchi,BolÃ­var
 Carchi,Espejo
 Carchi,Mira
-Carchi,Montúfar
+Carchi,MontÃºfar
 Carchi,San Pedro de Huaca
 Chimborazo,Riobamba
-Chimborazo,Alausí
+Chimborazo,AlausÃ­
 Chimborazo,Chambo
 Chimborazo,Chunchi
 Chimborazo,Colta
-Chimborazo,Cumandá
+Chimborazo,CumandÃ¡
 Chimborazo,Guamote
 Chimborazo,Guano
 Chimborazo,Pallatanga
 Chimborazo,Penipe
 Cotopaxi,Latacunga
-Cotopaxi,La Maná
+Cotopaxi,La ManÃ¡
 Cotopaxi,Pangua
-Cotopaxi,Pujilí
+Cotopaxi,PujilÃ­
 Cotopaxi,Salcedo
-Cotopaxi,Saquisilí
+Cotopaxi,SaquisilÃ­
 Cotopaxi,Sigchos
 El Oro,Machala
 El Oro,Arenillas
@@ -58,9 +58,9 @@ El Oro,Chilla
 El Oro,El Guabo
 El Oro,Huaquillas
 El Oro,Las Lajas
-El Oro,Marcabelí
+El Oro,MarcabelÃ­
 El Oro,Pasaje
-El Oro,Piñas
+El Oro,PiÃ±as
 El Oro,Portovelo
 El Oro,Santa Rosa
 El Oro,Zaruma
@@ -68,25 +68,25 @@ Esmeraldas,Esmeraldas
 Esmeraldas,Atacames
 Esmeraldas,Eloy Alfaro
 Esmeraldas,Muisne
-Esmeraldas,Quinindé
-Esmeraldas,Río Verde
+Esmeraldas,QuinindÃ©
+Esmeraldas,RÃ­o Verde
 Esmeraldas,San Lorenzo
-Galápagos,San Cristóbal
-Galápagos,Isabela
-Galápagos,Santa Cruz
+GalÃ¡pagos,San CristÃ³bal
+GalÃ¡pagos,Isabela
+GalÃ¡pagos,Santa Cruz
 Guayas,Guayaquil
 Guayas,Alfredo Baquerizo Moreno
 Guayas,Balao
 Guayas,Balzar
 Guayas,Colimes
 Guayas,Daule
-Guayas,Durán
+Guayas,DurÃ¡n
 Guayas,El Empalme
 Guayas,El Triunfo
 Guayas,General Antonio Elizalde
 Guayas,Isidro Ayora
 Guayas,Lomas de Sargentillo
-Guayas,Marcelino Maridueña
+Guayas,Marcelino MaridueÃ±a
 Guayas,Milagro
 Guayas,Naranjal
 Guayas,Naranjito
@@ -95,24 +95,24 @@ Guayas,Palestina
 Guayas,Pedro Carbo
 Guayas,Playas
 Guayas,Salitre
-Guayas,Samborondón
-Guayas,Santa Lucía
-Guayas,Simón Bolívar
+Guayas,SamborondÃ³n
+Guayas,Santa LucÃ­a
+Guayas,SimÃ³n BolÃ­var
 Guayas,Yaguachi
 Imbabura,Ibarra
 Imbabura,Antonio Ante
 Imbabura,Cotacachi
 Imbabura,Otavalo
 Imbabura,Pimampiro
-Imbabura,San Miguel de Urcuquí
+Imbabura,San Miguel de UrcuquÃ­
 Loja,Loja
 Loja,Calvas
 Loja,Catamayo
 Loja,Celica
 Loja,Chaguarpamba
-Loja,Espíndola
-Loja,Gonzanamá
-Loja,Macará
+Loja,EspÃ­ndola
+Loja,GonzanamÃ¡
+Loja,MacarÃ¡
 Loja,Olmedo
 Loja,Paltas
 Loja,Pindal
@@ -121,52 +121,52 @@ Loja,Quilanga
 Loja,Saraguro
 Loja,Sozoranga
 Loja,Zapotillo
-Los Ríos,Babahoyo
-Los Ríos,Baba
-Los Ríos,Buena Fe
-Los Ríos,Mocache
-Los Ríos,Montalvo
-Los Ríos,Palenque
-Los Ríos,Puebloviejo
-Los Ríos,Quevedo
-Los Ríos,Quinsaloma
-Los Ríos,Urdaneta
-Los Ríos,Valencia
-Los Ríos,Ventanas
-Los Ríos,Vinces
-Manabí,Portoviejo
-Manabí,24 de Mayo
-Manabí,Bolívar
-Manabí,Chone
-Manabí,El Carmen
-Manabí,Flavio Alfaro
-Manabí,Jama
-Manabí,Jaramijó
-Manabí,Jipijapa
-Manabí,Junín
-Manabí,Manta
-Manabí,Montecristi
-Manabí,Olmedo
-Manabí,Paján
-Manabí,Pedernales
-Manabí,Pichincha
-Manabí,Puerto López
-Manabí,Rocafuerte
-Manabí,San Vicente
-Manabí,Santa Ana
-Manabí,Sucre
-Manabí,Tosagua
+Los RÃ­os,Babahoyo
+Los RÃ­os,Baba
+Los RÃ­os,Buena Fe
+Los RÃ­os,Mocache
+Los RÃ­os,Montalvo
+Los RÃ­os,Palenque
+Los RÃ­os,Puebloviejo
+Los RÃ­os,Quevedo
+Los RÃ­os,Quinsaloma
+Los RÃ­os,Urdaneta
+Los RÃ­os,Valencia
+Los RÃ­os,Ventanas
+Los RÃ­os,Vinces
+ManabÃ­,Portoviejo
+ManabÃ­,24 de Mayo
+ManabÃ­,BolÃ­var
+ManabÃ­,Chone
+ManabÃ­,El Carmen
+ManabÃ­,Flavio Alfaro
+ManabÃ­,Jama
+ManabÃ­,JaramijÃ³
+ManabÃ­,Jipijapa
+ManabÃ­,JunÃ­n
+ManabÃ­,Manta
+ManabÃ­,Montecristi
+ManabÃ­,Olmedo
+ManabÃ­,PajÃ¡n
+ManabÃ­,Pedernales
+ManabÃ­,Pichincha
+ManabÃ­,Puerto LÃ³pez
+ManabÃ­,Rocafuerte
+ManabÃ­,San Vicente
+ManabÃ­,Santa Ana
+ManabÃ­,Sucre
+ManabÃ­,Tosagua
 Morona Santiago,Macas
 Morona Santiago,Gualaquiza
 Morona Santiago,Huamboya
-Morona Santiago,Limón Indanza
-Morona Santiago,Logroño
+Morona Santiago,LimÃ³n Indanza
+Morona Santiago,LogroÃ±o
 Morona Santiago,Morona
 Morona Santiago,Pablo Sexto
 Morona Santiago,Palora
 Morona Santiago,San Juan Bosco
 Morona Santiago,Santiago
-Morona Santiago,Sucúa
+Morona Santiago,SucÃºa
 Morona Santiago,Taisha
 Morona Santiago,Tiwintza
 Napo,Tena
@@ -184,35 +184,35 @@ Pastaza,Mera
 Pastaza,Santa Clara
 Pichincha,Quito
 Pichincha,Cayambe
-Pichincha,Mejía
+Pichincha,MejÃ­a
 Pichincha,Pedro Moncayo
 Pichincha,Pedro Vicente Maldonado
 Pichincha,Puerto Quito
-Pichincha,Rumiñahui
+Pichincha,RumiÃ±ahui
 Pichincha,San Miguel de los Bancos
 Santa Elena,Santa Elena
 Santa Elena,La Libertad
 Santa Elena,Salinas
-Santo Domingo de los Tsáchilas,Santo Domingo
-Santo Domingo de los Tsáchilas,La Concordia
-Sucumbíos,Nueva Loja
-Sucumbíos,Cascales
-Sucumbíos,Cuyabeno
-Sucumbíos,Gonzalo Pizarro
-Sucumbíos,Putumayo
-Sucumbíos,Shushufindi
-Sucumbíos,Sucumbíos
+Santo Domingo de los TsÃ¡chilas,Santo Domingo
+Santo Domingo de los TsÃ¡chilas,La Concordia
+SucumbÃ­os,Nueva Loja
+SucumbÃ­os,Cascales
+SucumbÃ­os,Cuyabeno
+SucumbÃ­os,Gonzalo Pizarro
+SucumbÃ­os,Putumayo
+SucumbÃ­os,Shushufindi
+SucumbÃ­os,SucumbÃ­os
 Tungurahua,Ambato
-Tungurahua,Baños de Agua Santa
+Tungurahua,BaÃ±os de Agua Santa
 Tungurahua,Cevallos
 Tungurahua,Mocha
 Tungurahua,Patate
 Tungurahua,Quero
 Tungurahua,San Pedro de Pelileo
-Tungurahua,Santiago de Píllaro
+Tungurahua,Santiago de PÃ­llaro
 Tungurahua,Tisaleo
 Zamora Chinchipe,Zamora
-Zamora Chinchipe,Centinela del Cóndor
+Zamora Chinchipe,Centinela del CÃ³ndor
 Zamora Chinchipe,Chinchipe
 Zamora Chinchipe,El Pangui
 Zamora Chinchipe,Nangaritza
