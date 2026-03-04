@@ -20,6 +20,11 @@ st.set_page_config(
 st.markdown("""
 <style>
 
+/* Forzar modo claro aunque el navegador esté en dark mode */
+html {
+    color-scheme: light;
+}
+
 /* Fondo general */
 .stApp {
     background-color: #F4F6F8;
@@ -27,7 +32,7 @@ st.markdown("""
 
 /* Texto general */
 html, body, [class*="css"]  {
-    color: #2C2C2C;
+    color: #2C2C2C !important;
 }
 
 /* Sidebar */
@@ -43,7 +48,7 @@ h1, h2, h3 {
 
 /* KPIs */
 [data-testid="metric-container"] {
-    background-color: white;
+    background-color: white !important;
     border-radius: 8px;
     padding: 15px;
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
@@ -51,7 +56,6 @@ h1, h2, h3 {
 
 </style>
 """, unsafe_allow_html=True)
-
 # ─────────────────────────────
 # TEMPLATE CORPORATIVO PLOTLY
 # ─────────────────────────────
@@ -256,7 +260,6 @@ ciudad_map = dict(
 # ─────────────────────────────
 
 st.sidebar.header("🎛️ Filtros")
-tema = st.sidebar.toggle("🌙 Modo oscuro", value=False)
 
 if st.sidebar.button("🔄 Reset filtros"):
 
