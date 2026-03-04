@@ -17,35 +17,40 @@ st.set_page_config(
 # ─────────────────────────────
 # ESTILO INSTITUCIONAL GEA
 # ─────────────────────────────
-if "tema_oscuro" not in st.session_state:
-    st.session_state.tema_oscuro = False
+st.markdown("""
+<style>
 
-tema = st.sidebar.toggle("🌙 Modo oscuro", value=st.session_state.tema_oscuro)
+/* Fondo general */
+.stApp {
+    background-color: #F4F6F8;
+}
 
-st.session_state.tema_oscuro = tema
+/* Texto general */
+html, body, [class*="css"]  {
+    color: #2C2C2C;
+}
 
-if tema:
+/* Sidebar */
+section[data-testid="stSidebar"] {
+    background-color: #0E1117;
+}
 
-    st.markdown("""
-    <style>
+/* Títulos */
+h1, h2, h3 {
+    color: #1F2E6D;
+    font-weight: 700;
+}
 
-    .stApp {
-        background-color: #0E1117;
-        color: white;
-    }
+/* KPIs */
+[data-testid="metric-container"] {
+    background-color: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
 
-    h1, h2, h3 {
-        color: #E5E7EB;
-    }
-
-    [data-testid="metric-container"] {
-        background-color: #1F2937;
-        border-radius: 8px;
-        padding: 15px;
-    }
-
-    </style>
-    """, unsafe_allow_html=True)
+</style>
+""", unsafe_allow_html=True)
 
 else:
 
