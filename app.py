@@ -196,12 +196,12 @@ if not st.session_state.authenticated:
 @st.cache_data(show_spinner=True)
 def load_all():
 
-    files = {
-        "2023": "1jVvFPdg5A5ySOQtKeuO1pLU6zG2cTa51",
-        "2024": "1YnRJtc6_NyXmXjmOMLP8oINOmqr7e3_I",
-        "2025": "1_etz-VsH66PpmnHVEo2H-wVgwkd4DKMl",
-        "2026": "1oZIhTS7zPGcHFF5cpM2LdnbWuUlyK2N6"
-    }
+files = {
+    "2023": st.secrets["FILE_2023"],
+    "2024": st.secrets["FILE_2024"],
+    "2025": st.secrets["FILE_2025"],
+    "2026": st.secrets["FILE_2026"]
+}
 
     columnas = [
         "Número Asistencia",
