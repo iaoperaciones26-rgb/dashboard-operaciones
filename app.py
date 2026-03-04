@@ -293,12 +293,34 @@ provincia = filtro_cascada("Provincia", "Provincia")
 if provincia:
     df_temp = df_temp[df_temp["Provincia"].isin(provincia)]
 
+# ───── CIUDAD DEPENDIENTE DE PROVINCIA
+
+if provincia:
+
+    cantones_filtrados = cantones[
+        cantones["Provincia"].isin(provincia)
+    ]
+
+    opciones_ciudades = sorted(
+        cantones_filtrados["CANTON_NORMALIZADO"].unique()
+    )
+
+else:
+
+    opciones_ciudades = sorted(
+        cantones["CANTON_NORMALIZADO"].unique()
+    )
+
+
 ciudad = st.sidebar.multiselect(
     "Ciudad / Cantón",
     opciones_ciudades,
     key="filtro_Ciudad",
     placeholder="Buscar ciudad..."
 )
+
+if ciudad:
+    df_temp = df_temp[df_temp["CIUDAD_NORMALIZADA"].isin(ciudad)]
 
 if ciudad:
     df_temp = df_temp[df_temp["CIUDAD_NORMALIZADA"].isin(ciudad)]
