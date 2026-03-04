@@ -30,20 +30,23 @@ if tema:
     st.markdown("""
     <style>
 
-    /* FONDO GENERAL */
+    /* Fuerza modo oscuro para evitar auto-dark de Chrome */
+    :root { color-scheme: dark; }
+
+    /* Fondo general */
     .stApp {
         background-color: #0B0F19;
         color: #E5E7EB !important;
     }
 
-    /* SIDEBAR */
+    /* Sidebar */
     section[data-testid="stSidebar"] {
         background-color: #0B0F19;
     }
 
-    /* TEXTO SIDEBAR */
+    /* Texto sidebar (Filtros, labels, etc.) */
     section[data-testid="stSidebar"] * {
-        color: #E5E7EB !important;
+        color: #FFFFFF !important;
     }
 
     /* KPIs */
@@ -53,21 +56,21 @@ if tema:
         padding: 15px;
     }
 
-    /* TEXTO KPIs */
+    /* Texto KPIs */
     [data-testid="metric-container"] label,
     [data-testid="metric-container"] div {
-        color: white !important;
+        color: #FFFFFF !important;
     }
 
-    /* TITULOS */
+    /* Títulos */
     h1, h2, h3 {
-        color: #E5E7EB !important;
+        color: #FFFFFF !important;
     }
 
-    /* TABLAS */
+    /* Tablas */
     .stDataFrame {
         background-color: #111827;
-        color: #E5E7EB;
+        color: #E5E7EB !important;
     }
 
     </style>
@@ -81,23 +84,27 @@ else:
     st.markdown("""
     <style>
 
-    /* FONDO GENERAL */
+    /* Fuerza modo claro para evitar auto-dark de Chrome */
+    :root { color-scheme: light; }
+
+    /* Fondo general */
     .stApp {
         background-color: #F4F6F8;
         color: #1F2937 !important;
     }
 
-    /* SIDEBAR */
+    /* Sidebar */
     section[data-testid="stSidebar"] {
         background-color: #F8FAFC;
     }
 
-    /* TEXTO SIDEBAR */
+    /* Texto sidebar (Filtros, labels) */
     section[data-testid="stSidebar"] * {
         color: #1F2937 !important;
+        font-weight: 500;
     }
 
-    /* TITULOS */
+    /* Títulos */
     h1, h2, h3 {
         color: #1F2E6D !important;
         font-weight: 700;
@@ -105,32 +112,31 @@ else:
 
     /* KPIs */
     [data-testid="metric-container"] {
-        background-color: white;
+        background-color: #FFFFFF;
         border-radius: 10px;
         padding: 15px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
 
-    /* TEXTO KPIs */
+    /* Texto KPIs */
     [data-testid="metric-container"] label,
     [data-testid="metric-container"] div {
         color: #1F2937 !important;
     }
 
-    /* CONTENEDOR GRÁFICOS */
+    /* Contenedor gráficos */
     div[data-testid="stPlotlyChart"] {
-        background-color: white;
+        background-color: #FFFFFF;
         padding: 18px;
         border-radius: 10px;
         box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
 
-    /* TABLAS */
+    /* Tablas */
     .stDataFrame {
-        background-color: white;
+        background-color: #FFFFFF;
+        color: #1F2937 !important;
         border-radius: 10px;
-        padding: 10px;
-        color: #1F2937;
     }
 
     </style>
