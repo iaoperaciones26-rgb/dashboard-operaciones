@@ -52,29 +52,6 @@ h1, h2, h3 {
 </style>
 """, unsafe_allow_html=True)
 
-else:
-
-    st.markdown("""
-    <style>
-
-    .stApp {
-        background-color: #F4F6F8;
-    }
-
-    h1, h2, h3 {
-        color: #1F2E6D;
-        font-weight: 700;
-    }
-
-    [data-testid="metric-container"] {
-        background-color: white;
-        border-radius: 8px;
-        padding: 15px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-
-    </style>
-    """, unsafe_allow_html=True)
 # ─────────────────────────────
 # TEMPLATE CORPORATIVO PLOTLY
 # ─────────────────────────────
