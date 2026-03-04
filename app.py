@@ -192,6 +192,34 @@ def load_all():
 df = load_all()
 
 # ─────────────────────────────
+# CATÁLOGO DE CANTONES ECUADOR
+# ─────────────────────────────
+
+cantones = pd.read_csv("data/cantones_ecuador.csv")
+
+catalogo_ciudades = (
+    cantones["Cantón"]
+    .dropna()
+    .astype(str)
+    .str.strip()
+    .unique()
+)
+
+# ciudades que existen en la base
+ciudades_base = (
+    df["Ciudad"]
+    .dropna()
+    .astype(str)
+    .str.strip()
+    .unique()
+)
+
+# unión catálogo + base
+opciones_ciudades = sorted(
+    set(ciudades_base).union(set(catalogo_ciudades))
+)
+
+# ─────────────────────────────
 # FILTROS (SIN COPIAS)
 # ─────────────────────────────
 st.sidebar.header("🎛️ Filtros")
@@ -255,10 +283,16 @@ provincia = filtro_cascada("Provincia", "Provincia")
 if provincia:
     df_temp = df_temp[df_temp["Provincia"].isin(provincia)]
 
-ciudad = filtro_cascada("Ciudad", "Ciudad")
+ciudad = st.sidebar.multiselect(
+    "Ciudad",
+    opciones_ciudades,
+    key="filtro_Ciudad",
+    placeholder="Buscar ciudad..."
+)
+
 if ciudad:
     df_temp = df_temp[df_temp["Ciudad"].isin(ciudad)]
-
+    
 local_foraneo = filtro_cascada("Local / Foráneo", "Local_Foráneo")
 if local_foraneo:
     df_temp = df_temp[df_temp["Local_Foráneo"].isin(local_foraneo)]
