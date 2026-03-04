@@ -74,7 +74,7 @@ if not st.session_state.authenticated:
     st.stop()
 
 # ─────────────────────────────
-# CARGA OPTIMIZADA
+# CARGA OPTIMIZADA (SOLO COLUMNAS NECESARIAS)
 # ─────────────────────────────
 @st.cache_data(show_spinner=True)
 def load_all():
@@ -113,7 +113,6 @@ def load_all():
     dfs = []
 
     for year, file_id in files.items():
-
         url = f"https://drive.google.com/uc?id={file_id}"
         output = f"/tmp/{year}.csv"
 
@@ -132,18 +131,18 @@ def load_all():
     df = pd.concat(dfs, ignore_index=True)
     df.columns = df.columns.str.replace('\ufeff', '', regex=False).str.strip()
 
+    # ───── PROCESAMIENTO
     fecha_col = [c for c in df.columns if "fecha" in c.lower()][0]
     df[fecha_col] = pd.to_datetime(df[fecha_col], dayfirst=True, errors="coerce")
-
     df = df.dropna(subset=[fecha_col])
 
     df["AÑO"] = df[fecha_col].dt.year.astype("int16").astype(str)
     df["MES"] = df[fecha_col].dt.month.astype("int8")
 
     meses_dict = {
-        1:"Ene",2:"Feb",3:"Mar",4:"Abr",
-        5:"May",6:"Jun",7:"Jul",8:"Ago",
-        9:"Sep",10:"Oct",11:"Nov",12:"Dic"
+        1: "Ene", 2: "Feb", 3: "Mar", 4: "Abr",
+        5: "May", 6: "Jun", 7: "Jul", 8: "Ago",
+        9: "Sep", 10: "Oct", 11: "Nov", 12: "Dic"
     }
 
     df["MES_NOMBRE"] = df["MES"].map(meses_dict)
@@ -153,8 +152,8 @@ def load_all():
     df["Total de Costo Global"] = (
         df["Total de Costo Global"]
         .astype(str)
-        .str.replace("$","",regex=False)
-        .str.replace(",","",regex=False)
+        .str.replace("$", "", regex=False)
+        .str.replace(",", "", regex=False)
     )
 
     df["Total de Costo Global"] = pd.to_numeric(
@@ -162,8 +161,9 @@ def load_all():
         errors="coerce"
     ).fillna(0)
 
+    # ───── CONVERTIR A CATEGORY (GRAN REDUCCIÓN DE MEMORIA)
     columnas_cat = [
-        "AÑO","MES_NOMBRE",
+        "AÑO", "MES_NOMBRE",
         "Grupo de Servicio",
         "Nombre del Servicio",
         "Nombre del Subservicio",
@@ -171,7 +171,7 @@ def load_all():
         "Canal Origen",
         "ESPECIALIDAD MEDICA (CITAS)",
         "Nombre del Proveedor",
-        "País","Provincia","Ciudad",
+        "País", "Provincia", "Ciudad",
         "Local_Foráneo",
         "TIPO DE CLIENTE",
         "Cliente Institucional",
@@ -190,9 +190,8 @@ def load_all():
 
 
 df = load_all()
-
 # ─────────────────────────────
-# NORMALIZACIÓN CIUDADES
+# NORMALIZACIÓN DE CIUDADES
 # ─────────────────────────────
 
 def normalizar_ciudad(texto):
@@ -202,26 +201,30 @@ def normalizar_ciudad(texto):
 
     texto = str(texto).upper().strip()
 
-    texto = texto.replace("CANTON ","")
-    texto = texto.replace("CANTÓN ","")
-    texto = texto.replace("CDLA ","")
-    texto = texto.replace("CIUDAD ","")
+    texto = texto.replace("CANTON ", "")
+    texto = texto.replace("CANTÓN ", "")
+    texto = texto.replace("CDLA ", "")
+    texto = texto.replace("CIUDAD ", "")
 
     return texto
 
-
+# normalizar ciudades de la base
 df["CIUDAD_NORMALIZADA"] = df["Ciudad"].apply(normalizar_ciudad)
 
 # ─────────────────────────────
-# CATÁLOGO CANTONES ECUADOR
+# CATÁLOGO DE CANTONES ECUADOR
 # ─────────────────────────────
 
 cantones = pd.read_csv("data/cantones_ecuador.csv")
-
+# normalizar cantones del catálogo
 cantones["CANTON_NORMALIZADO"] = cantones["Cantón"].apply(normalizar_ciudad)
 
-cantones["CANTON_DISPLAY"] = cantones["Cantón"].astype(str).str.strip()
-
+# ───── NOMBRE BONITO PARA FILTROS
+cantones["CANTON_DISPLAY"] = (
+    cantones["Cantón"]
+    .astype(str)
+    .str.strip()
+)
 ciudad_map = dict(
     zip(
         cantones["CANTON_DISPLAY"],
@@ -229,10 +232,21 @@ ciudad_map = dict(
     )
 )
 
-# ─────────────────────────────
-# FILTROS
-# ─────────────────────────────
+cantones["CANTON_NORMALIZADO"] = cantones["Cantón"].apply(normalizar_ciudad)
 
+catalogo_ciudades = cantones["CANTON_NORMALIZADO"].unique()
+
+# ciudades que existen en la base
+ciudades_base = df["CIUDAD_NORMALIZADA"].unique()
+
+# unión catálogo + base
+opciones_ciudades = sorted(
+    set(ciudades_base).union(set(catalogo_ciudades))
+)
+
+# ─────────────────────────────
+# FILTROS (SIN COPIAS)
+# ─────────────────────────────
 st.sidebar.header("🎛️ Filtros")
 
 if st.sidebar.button("🔄 Reset filtros"):
@@ -244,72 +258,74 @@ if st.sidebar.button("🔄 Reset filtros"):
 
     st.rerun()
 
-df_temp = df
+df_temp = df  # ← sin copy
 
 def filtro_cascada(label, columna):
-
     opciones = sorted(df_temp[columna].dropna().unique())
+    return st.sidebar.multiselect(label, opciones, key=f"filtro_{columna}")
 
-    return st.sidebar.multiselect(
-        label,
-        opciones,
-        key=f"filtro_{columna}"
-    )
-
-anio = filtro_cascada("Año","AÑO")
-
+anio = filtro_cascada("Año", "AÑO")
 if anio:
     df_temp = df_temp[df_temp["AÑO"].isin(anio)]
 
-mes_nombre = filtro_cascada("Mes","MES_NOMBRE")
-
+mes_nombre = filtro_cascada("Mes", "MES_NOMBRE")
 if mes_nombre:
     df_temp = df_temp[df_temp["MES_NOMBRE"].isin(mes_nombre)]
 
-grupo = filtro_cascada("Grupo de Servicio","Grupo de Servicio")
-
+grupo = filtro_cascada("Grupo de Servicio", "Grupo de Servicio")
 if grupo:
     df_temp = df_temp[df_temp["Grupo de Servicio"].isin(grupo)]
 
-servicio = filtro_cascada("Nombre del Servicio","Nombre del Servicio")
-
+servicio = filtro_cascada("Nombre del Servicio", "Nombre del Servicio")
 if servicio:
     df_temp = df_temp[df_temp["Nombre del Servicio"].isin(servicio)]
 
-subservicio = filtro_cascada("Subservicio","Nombre del Subservicio")
-
+subservicio = filtro_cascada("Subservicio", "Nombre del Subservicio")
 if subservicio:
     df_temp = df_temp[df_temp["Nombre del Subservicio"].isin(subservicio)]
 
-estado = filtro_cascada("Estado de Asistencia","Estado de Asistencia")
-
+estado = filtro_cascada("Estado de Asistencia", "Estado de Asistencia")
 if estado:
     df_temp = df_temp[df_temp["Estado de Asistencia"].isin(estado)]
 
-canal = filtro_cascada("Canal Origen","Canal Origen")
-
+canal = filtro_cascada("Canal Origen", "Canal Origen")
 if canal:
     df_temp = df_temp[df_temp["Canal Origen"].isin(canal)]
 
-especialidad = filtro_cascada("Especialidad Médica","ESPECIALIDAD MEDICA (CITAS)")
-
+especialidad = filtro_cascada("Especialidad Médica", "ESPECIALIDAD MEDICA (CITAS)")
 if especialidad:
     df_temp = df_temp[df_temp["ESPECIALIDAD MEDICA (CITAS)"].isin(especialidad)]
 
-proveedor = filtro_cascada("Proveedor","Nombre del Proveedor")
-
+proveedor = filtro_cascada("Proveedor", "Nombre del Proveedor")
 if proveedor:
     df_temp = df_temp[df_temp["Nombre del Proveedor"].isin(proveedor)]
 
-pais = filtro_cascada("País","País")
-
+pais = filtro_cascada("País", "País")
 if pais:
     df_temp = df_temp[df_temp["País"].isin(pais)]
 
-provincia = filtro_cascada("Provincia","Provincia")
-
+provincia = filtro_cascada("Provincia", "Provincia")
 if provincia:
     df_temp = df_temp[df_temp["Provincia"].isin(provincia)]
+
+# ───── CIUDAD DEPENDIENTE DE PROVINCIA
+
+if provincia:
+
+    cantones_filtrados = cantones[
+        cantones["Provincia"].isin(provincia)
+    ]
+
+    opciones_ciudades = sorted(
+        cantones_filtrados["CANTON_NORMALIZADO"].unique()
+    )
+
+else:
+
+    opciones_ciudades = sorted(
+        cantones["CANTON_NORMALIZADO"].unique()
+    )
+
 
 ciudad_display = st.sidebar.multiselect(
     "Ciudad / Cantón",
@@ -317,49 +333,46 @@ ciudad_display = st.sidebar.multiselect(
     key="filtro_Ciudad",
     placeholder="Buscar ciudad..."
 )
-
 ciudad = [ciudad_map[c] for c in ciudad_display]
 
 if ciudad:
     df_temp = df_temp[df_temp["CIUDAD_NORMALIZADA"].isin(ciudad)]
 
-local_foraneo = filtro_cascada("Local / Foráneo","Local_Foráneo")
-
+if ciudad:
+    df_temp = df_temp[df_temp["CIUDAD_NORMALIZADA"].isin(ciudad)]
+    
+local_foraneo = filtro_cascada("Local / Foráneo", "Local_Foráneo")
 if local_foraneo:
     df_temp = df_temp[df_temp["Local_Foráneo"].isin(local_foraneo)]
 
-tipo_cliente = filtro_cascada("Tipo de Cliente","TIPO DE CLIENTE")
-
+tipo_cliente = filtro_cascada("Tipo de Cliente", "TIPO DE CLIENTE")
 if tipo_cliente:
     df_temp = df_temp[df_temp["TIPO DE CLIENTE"].isin(tipo_cliente)]
 
-cliente = filtro_cascada("Cliente Institucional","Cliente Institucional")
-
+cliente = filtro_cascada("Cliente Institucional", "Cliente Institucional")
 if cliente:
     df_temp = df_temp[df_temp["Cliente Institucional"].isin(cliente)]
 
-cuenta = filtro_cascada("Nombre de la cuenta","Nombre de la cuenta")
-
+cuenta = filtro_cascada("Nombre de la cuenta", "Nombre de la cuenta")
 if cuenta:
     df_temp = df_temp[df_temp["Nombre de la cuenta"].isin(cuenta)]
 
-plan = filtro_cascada("Nombre del plan","Nombre del plan")
-
+plan = filtro_cascada("Nombre del plan", "Nombre del plan")
 if plan:
     df_temp = df_temp[df_temp["Nombre del plan"].isin(plan)]
 
-evento = filtro_cascada("Tipo de Evento","Tipo de Evento")
-
+evento = filtro_cascada("Tipo de Evento", "Tipo de Evento")
 if evento:
     df_temp = df_temp[df_temp["Tipo de Evento"].isin(evento)]
 
-df_f = df_temp
+df_f = df_temp  # ← sin copy
 
 if df_f.empty:
     st.warning("No hay datos con los filtros seleccionados.")
     st.stop()
-
+# ─────────────────────────────
 # KPIs
+# ─────────────────────────────
 st.markdown("<h1>Dashboard Operaciones GEA</h1>", unsafe_allow_html=True)
 
 total_asistencias = df_f["Número Asistencia"].count()
@@ -367,12 +380,13 @@ costo_total = df_f["Total de Costo Global"].sum()
 costo_promedio = costo_total / total_asistencias if total_asistencias > 0 else 0
 
 c1, c2, c3 = st.columns(3)
-
 c1.metric("Total asistencias", f"{total_asistencias:,}")
 c2.metric("Costo total", f"${costo_total:,.2f}")
 c3.metric("Costo promedio", f"${costo_promedio:,.2f}")
 
+# ─────────────────────────────
 # RESUMEN EJECUTIVO
+# ─────────────────────────────
 st.subheader("📊 Resumen Ejecutivo")
 
 col1, col2 = st.columns(2)
@@ -380,6 +394,7 @@ col1, col2 = st.columns(2)
 orden_meses = ["Ene","Feb","Mar","Abr","May","Jun",
                "Jul","Ago","Sep","Oct","Nov","Dic"]
 
+# Total asistencias por año
 total_anual = (
     df_f.groupby("AÑO", observed=True)["Número Asistencia"]
     .count()
@@ -393,10 +408,14 @@ fig_total_asist = px.bar(
     text_auto=True
 )
 
-fig_total_asist.update_layout(xaxis_type="category", height=400)
+fig_total_asist.update_layout(
+    xaxis_type="category",
+    height=400
+)
 
 col1.plotly_chart(fig_total_asist, use_container_width=True)
 
+# Asistencias por mes
 asist_mes = (
     df_f.groupby(["AÑO","MES_NOMBRE"], observed=True)["Número Asistencia"]
     .count()
@@ -419,7 +438,9 @@ fig_asist_mes.update_layout(height=400)
 
 col2.plotly_chart(fig_asist_mes, use_container_width=True)
 
-# TOPS
+# ─────────────────────────────
+# TOP SERVICIOS Y ESPECIALIDADES
+# ─────────────────────────────
 st.subheader("🏆 Top servicios y especialidades")
 
 col_a, col_b = st.columns(2)
@@ -464,11 +485,13 @@ fig_top_esp.update_layout(height=400)
 
 col_b.plotly_chart(fig_top_esp, use_container_width=True)
 
+# ─────────────────────────────
 # TABLA
+# ─────────────────────────────
 st.subheader("📋 Estado de Asistencia por Mes")
 
 tabla_estado = (
-    df_f.groupby(["Estado de Asistencia","MES_NOMBRE"], observed=True)["Número Asistencia"]
+    df_f.groupby(["Estado de Asistencia", "MES_NOMBRE"], observed=True)["Número Asistencia"]
     .count()
     .reset_index()
 )
@@ -483,11 +506,9 @@ tabla_estado = tabla_estado.reindex(columns=orden_meses)
 tabla_estado = tabla_estado.fillna(0).astype(int)
 
 tabla_estado["Total general"] = tabla_estado.sum(axis=1)
-
 tabla_estado = tabla_estado.sort_values("Total general", ascending=False)
 
 filas = len(tabla_estado)
-
 altura_tabla = 70 + (filas * 35)
 
 st.dataframe(
@@ -496,11 +517,14 @@ st.dataframe(
     height=altura_tabla
 )
 
-# CANCELACIONES
+# ─────────────────────────────
+# ESTADOS Y MOTIVOS DE CANCELACIONES
+# ─────────────────────────────
 st.subheader("Estados y Motivos de Cancelaciones")
 
-col_pie, col_cancel = st.columns([1,1.4])
+col_pie, col_cancel = st.columns([1, 1.4])
 
+# PIE
 estado_totales = (
     df_f.groupby("Estado de Asistencia", observed=True)["Número Asistencia"]
     .count()
@@ -514,10 +538,10 @@ fig_pie = px.pie(
     hole=0.55,
     color="Estado de Asistencia",
     color_discrete_map={
-        "Concluido":"#2E7D32",
-        "Cancelado posterior":"#8B1E1E",
-        "Cancelado al momento":"#8B1E1E",
-        "En proceso":"#1565A6"
+        "Concluido": "#2E7D32",
+        "Cancelado posterior": "#8B1E1E",
+        "Cancelado al momento": "#8B1E1E",
+        "En proceso": "#1565A6"
     }
 )
 
@@ -525,9 +549,11 @@ fig_pie.update_layout(height=400)
 
 col_pie.plotly_chart(fig_pie, use_container_width=True)
 
+# ───── CANCELACIONES (sin copy grande)
+
 df_cancelados = df_f.loc[
     df_f["Estado de Asistencia"].isin(
-        ["Cancelado posterior","Cancelado al momento"]
+        ["Cancelado posterior", "Cancelado al momento"]
     )
 ]
 
@@ -539,7 +565,7 @@ if not df_cancelados.empty and \
         df_cancelados["Motivo Cancelacion"].astype(str)
         + " - "
         + df_cancelados["Submotivo Cancelacion"].astype(str)
-    ).str.replace(" - $","",regex=True)
+    ).str.replace(" - $", "", regex=True)
 
     top_cancelaciones = (
         motivo_completo
@@ -548,7 +574,7 @@ if not df_cancelados.empty and \
         .reset_index()
     )
 
-    top_cancelaciones.columns = ["Motivo_Completo","Total"]
+    top_cancelaciones.columns = ["Motivo_Completo", "Total"]
 
     fig_cancel = px.bar(
         top_cancelaciones.sort_values("Total"),
@@ -568,5 +594,4 @@ if not df_cancelados.empty and \
     col_cancel.plotly_chart(fig_cancel, use_container_width=True)
 
 else:
-
     col_cancel.info("No existen cancelaciones para los filtros seleccionados.")
