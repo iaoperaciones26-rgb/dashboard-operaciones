@@ -216,6 +216,18 @@ df["CIUDAD_NORMALIZADA"] = df["Ciudad"].apply(normalizar_ciudad)
 # ─────────────────────────────
 
 cantones = pd.read_csv("data/cantones_ecuador.csv")
+# ───── NOMBRE BONITO PARA FILTROS
+cantones["CANTON_DISPLAY"] = (
+    cantones["Cantón"]
+    .astype(str)
+    .str.strip()
+)
+ciudad_map = dict(
+    zip(
+        cantones["CANTON_DISPLAY"],
+        cantones["CANTON_NORMALIZADO"]
+    )
+)
 
 cantones["CANTON_NORMALIZADO"] = cantones["Cantón"].apply(normalizar_ciudad)
 
@@ -312,12 +324,13 @@ else:
     )
 
 
-ciudad = st.sidebar.multiselect(
+ciudad_display = st.sidebar.multiselect(
     "Ciudad / Cantón",
-    opciones_ciudades,
+    sorted(ciudad_map.keys()),
     key="filtro_Ciudad",
     placeholder="Buscar ciudad..."
 )
+ciudad = [ciudad_map[c] for c in ciudad_display]
 
 if ciudad:
     df_temp = df_temp[df_temp["CIUDAD_NORMALIZADA"].isin(ciudad)]
