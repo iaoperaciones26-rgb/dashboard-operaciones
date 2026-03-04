@@ -48,7 +48,7 @@ if tema:
 
     /* TEXTO SIDEBAR */
     section[data-testid="stSidebar"] * {
-        color: #0B0F19 !important;
+        color: #FFFFFF !important;
     }
 
     /* TITULOS */
