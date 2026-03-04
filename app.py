@@ -190,6 +190,26 @@ def load_all():
 
 
 df = load_all()
+# ─────────────────────────────
+# NORMALIZACIÓN DE CIUDADES
+# ─────────────────────────────
+
+def normalizar_ciudad(texto):
+
+    if pd.isna(texto):
+        return ""
+
+    texto = str(texto).upper().strip()
+
+    texto = texto.replace("CANTON ", "")
+    texto = texto.replace("CANTÓN ", "")
+    texto = texto.replace("CDLA ", "")
+    texto = texto.replace("CIUDAD ", "")
+
+    return texto
+
+# normalizar ciudades de la base
+df["CIUDAD_NORMALIZADA"] = df["Ciudad"].apply(normalizar_ciudad)
 
 # ─────────────────────────────
 # CATÁLOGO DE CANTONES ECUADOR
@@ -197,22 +217,12 @@ df = load_all()
 
 cantones = pd.read_csv("data/cantones_ecuador.csv")
 
-catalogo_ciudades = (
-    cantones["Cantón"]
-    .dropna()
-    .astype(str)
-    .str.strip()
-    .unique()
-)
+cantones["CANTON_NORMALIZADO"] = cantones["Cantón"].apply(normalizar_ciudad)
+
+catalogo_ciudades = cantones["CANTON_NORMALIZADO"].unique()
 
 # ciudades que existen en la base
-ciudades_base = (
-    df["Ciudad"]
-    .dropna()
-    .astype(str)
-    .str.strip()
-    .unique()
-)
+ciudades_base = df["CIUDAD_NORMALIZADA"].unique()
 
 # unión catálogo + base
 opciones_ciudades = sorted(
@@ -284,14 +294,14 @@ if provincia:
     df_temp = df_temp[df_temp["Provincia"].isin(provincia)]
 
 ciudad = st.sidebar.multiselect(
-    "Ciudad",
+    "Ciudad / Cantón",
     opciones_ciudades,
     key="filtro_Ciudad",
     placeholder="Buscar ciudad..."
 )
 
 if ciudad:
-    df_temp = df_temp[df_temp["Ciudad"].isin(ciudad)]
+    df_temp = df_temp[df_temp["CIUDAD_NORMALIZADA"].isin(ciudad)]
     
 local_foraneo = filtro_cascada("Local / Foráneo", "Local_Foráneo")
 if local_foraneo:
