@@ -4,6 +4,7 @@ import plotly.express as px
 import plotly.io as pio
 import gdown
 import os
+import unicodedata
 
 # ─────────────────────────────
 # CONFIGURACIÓN GENERAL
@@ -195,6 +196,8 @@ df = load_all()
 # NORMALIZACIÓN CIUDADES
 # ─────────────────────────────
 
+import unicodedata
+
 def normalizar_ciudad(texto):
 
     if pd.isna(texto):
@@ -202,10 +205,14 @@ def normalizar_ciudad(texto):
 
     texto = str(texto).upper().strip()
 
-    texto = texto.replace("CANTON ","")
-    texto = texto.replace("CANTÓN ","")
-    texto = texto.replace("CDLA ","")
-    texto = texto.replace("CIUDAD ","")
+    # eliminar tildes
+    texto = unicodedata.normalize("NFKD", texto)
+    texto = "".join([c for c in texto if not unicodedata.combining(c)])
+
+    texto = texto.replace("CANTON ", "")
+    texto = texto.replace("CANTÓN ", "")
+    texto = texto.replace("CDLA ", "")
+    texto = texto.replace("CIUDAD ", "")
 
     return texto
 
