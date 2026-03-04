@@ -25,27 +25,34 @@ tema = st.sidebar.toggle("🌙 Modo oscuro", value=st.session_state.tema_oscuro)
 st.session_state.tema_oscuro = tema
 
 
+# ───────────── MODO OSCURO ─────────────
 if tema:
 
     st.markdown("""
     <style>
 
-    /* Fuerza modo oscuro para evitar auto-dark de Chrome */
-    :root { color-scheme: dark; }
+    :root {
+        color-scheme: dark;
+    }
 
-    /* Fondo general */
+    /* FONDO GENERAL */
     .stApp {
         background-color: #0B0F19;
         color: #E5E7EB !important;
     }
 
-    /* Sidebar */
+    /* SIDEBAR */
     section[data-testid="stSidebar"] {
         background-color: #0B0F19;
     }
 
-    /* Texto sidebar (Filtros, labels, etc.) */
+    /* TEXTO SIDEBAR */
     section[data-testid="stSidebar"] * {
+        color: #FFFFFF !important;
+    }
+
+    /* TITULOS */
+    h1, h2, h3 {
         color: #FFFFFF !important;
     }
 
@@ -56,21 +63,31 @@ if tema:
         padding: 15px;
     }
 
-    /* Texto KPIs */
-    [data-testid="metric-container"] label,
-    [data-testid="metric-container"] div {
+    /* KPI TITULO */
+    [data-testid="metric-container"] label {
         color: #FFFFFF !important;
+        font-weight: 500;
     }
 
-    /* Títulos */
-    h1, h2, h3 {
+    /* KPI VALOR */
+    [data-testid="metric-container"] [data-testid="stMetricValue"] {
         color: #FFFFFF !important;
+        font-weight: 700;
+        font-size: 28px;
     }
 
-    /* Tablas */
+    /* CONTENEDOR GRAFICOS */
+    div[data-testid="stPlotlyChart"] {
+        background-color: #0F172A;
+        padding: 18px;
+        border-radius: 10px;
+    }
+
+    /* TABLAS */
     .stDataFrame {
         background-color: #111827;
         color: #E5E7EB !important;
+        border-radius: 10px;
     }
 
     </style>
@@ -79,32 +96,34 @@ if tema:
     pio.templates.default = "plotly_dark"
 
 
+# ───────────── MODO CLARO ─────────────
 else:
 
     st.markdown("""
     <style>
 
-    /* Fuerza modo claro para evitar auto-dark de Chrome */
-    :root { color-scheme: light; }
+    :root {
+        color-scheme: light;
+    }
 
-    /* Fondo general */
+    /* FONDO GENERAL */
     .stApp {
         background-color: #F4F6F8;
         color: #1F2937 !important;
     }
 
-    /* Sidebar */
+    /* SIDEBAR */
     section[data-testid="stSidebar"] {
         background-color: #F8FAFC;
     }
 
-    /* Texto sidebar (Filtros, labels) */
+    /* TEXTO SIDEBAR */
     section[data-testid="stSidebar"] * {
         color: #1F2937 !important;
         font-weight: 500;
     }
 
-    /* Títulos */
+    /* TITULOS */
     h1, h2, h3 {
         color: #1F2E6D !important;
         font-weight: 700;
@@ -118,13 +137,20 @@ else:
         box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
 
-    /* Texto KPIs */
-    [data-testid="metric-container"] label,
-    [data-testid="metric-container"] div {
+    /* KPI TITULO */
+    [data-testid="metric-container"] label {
         color: #1F2937 !important;
+        font-weight: 500;
     }
 
-    /* Contenedor gráficos */
+    /* KPI VALOR */
+    [data-testid="metric-container"] [data-testid="stMetricValue"] {
+        color: #1F2937 !important;
+        font-weight: 700;
+        font-size: 28px;
+    }
+
+    /* CONTENEDOR GRAFICOS */
     div[data-testid="stPlotlyChart"] {
         background-color: #FFFFFF;
         padding: 18px;
@@ -132,11 +158,12 @@ else:
         box-shadow: 0 4px 12px rgba(0,0,0,0.06);
     }
 
-    /* Tablas */
+    /* TABLAS */
     .stDataFrame {
         background-color: #FFFFFF;
         color: #1F2937 !important;
         border-radius: 10px;
+        padding: 10px;
     }
 
     </style>
