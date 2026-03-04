@@ -125,10 +125,7 @@ else:
     """, unsafe_allow_html=True)
 
     pio.templates.default = "GEA"
-    """, unsafe_allow_html=True)
-
-    # plotly claro
-    pio.templates.default = "GEA"
+   
 # ─────────────────────────────
 # TEMPLATE CORPORATIVO PLOTLY
 # ─────────────────────────────
