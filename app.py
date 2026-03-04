@@ -76,11 +76,11 @@ if tema:
 }
 
     /* CONTENEDOR GRAFICOS */
-    div[data-testid="stPlotlyChart"] {
-        background-color: #0F172A;
-        padding: 18px;
-        border-radius: 10px;
-    }
+div[data-testid="stPlotlyChart"] {
+    background-color: white;
+    padding: 12px;
+    border-radius: 10px;
+}
 
     /* TABLAS */
     .stDataFrame {
@@ -148,13 +148,12 @@ else:
     font-weight:700;
 }
 
-    /* CONTENEDOR GRAFICOS */
-    div[data-testid="stPlotlyChart"] {
-        background-color: #FFFFFF;
-        padding: 18px;
-        border-radius: 10px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    }
+  /* CONTENEDOR GRAFICOS */
+div[data-testid="stPlotlyChart"] {
+    background-color: transparent;
+    padding: 0px;
+    border-radius: 10px;
+}
 
     /* TABLAS */
     .stDataFrame {
