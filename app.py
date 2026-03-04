@@ -76,7 +76,7 @@ else:
     st.markdown("""
     <style>
 
-    /* Fondo general */
+    /* Fondo general del dashboard */
     .stApp {
         background-color: #F4F6F8;
         color: #2C2C2C;
@@ -84,7 +84,7 @@ else:
 
     /* Sidebar */
     section[data-testid="stSidebar"] {
-        background-color: #0B0F19;
+        background-color: #F8FAFC;
     }
 
     /* Texto */
@@ -101,12 +101,30 @@ else:
     /* KPIs */
     [data-testid="metric-container"] {
         background-color: white;
-        border-radius: 8px;
+        border-radius: 10px;
         padding: 15px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+
+    /* CONTENEDOR DE GRÁFICOS */
+    div[data-testid="stPlotlyChart"] {
+        background-color: white;
+        padding: 18px;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+    }
+
+    /* TABLAS */
+    .stDataFrame {
+        background-color: white;
+        border-radius: 10px;
+        padding: 10px;
     }
 
     </style>
+    """, unsafe_allow_html=True)
+
+    pio.templates.default = "GEA"
     """, unsafe_allow_html=True)
 
     # plotly claro
