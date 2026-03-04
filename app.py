@@ -32,13 +32,13 @@ if tema:
 
     /* Fondo general */
     .stApp {
-        background-color: #0E1117;
+        background-color: #0B0F19;
         color: #E5E7EB;
     }
 
     /* Sidebar */
     section[data-testid="stSidebar"] {
-        background-color: #0E1117;
+        background-color: #0B0F19;
     }
 
     /* Texto */
@@ -84,7 +84,7 @@ else:
 
     /* Sidebar */
     section[data-testid="stSidebar"] {
-        background-color: #0E1117;
+        background-color: #0B0F19;
     }
 
     /* Texto */
