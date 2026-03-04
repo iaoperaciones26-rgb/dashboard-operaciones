@@ -56,25 +56,23 @@ if tema:
         color: #FFFFFF !important;
     }
 
-    /* KPIs */
-    [data-testid="metric-container"] {
-        background-color: #1F2937;
-        border-radius: 10px;
-        padding: 15px;
-    }
+ /* KPI CONTENEDOR */
+[data-testid="metric-container"]{
+    background-color:#1F2937;
+    border-radius:10px;
+    padding:15px;
+}
 
-    /* KPI TITULO */
-    [data-testid="metric-container"] label {
-        color: #FFFFFF !important;
-        font-weight: 500;
-    }
+/* TITULO KPI */
+[data-testid="metric-container"] label{
+    color:#FFFFFF !important;
+}
 
-    /* KPI VALOR */
-    [data-testid="metric-container"] [data-testid="stMetricValue"] {
-        color: #FFFFFF !important;
-        font-weight: 700;
-        font-size: 28px;
-    }
+/* VALOR KPI */
+[data-testid="stMetricValue"]{
+    color:#FFFFFF !important;
+    font-weight:700;
+}
 
     /* CONTENEDOR GRAFICOS */
     div[data-testid="stPlotlyChart"] {
@@ -129,26 +127,24 @@ else:
         font-weight: 700;
     }
 
-    /* KPIs */
-    [data-testid="metric-container"] {
-        background-color: #FFFFFF;
-        border-radius: 10px;
-        padding: 15px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.06);
-    }
+/* KPI CONTENEDOR */
+[data-testid="metric-container"]{
+    background-color:#FFFFFF;
+    border-radius:10px;
+    padding:15px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.06);
+}
 
-    /* KPI TITULO */
-    [data-testid="metric-container"] label {
-        color: #1F2937 !important;
-        font-weight: 500;
-    }
+/* TITULO KPI */
+[data-testid="metric-container"] label{
+    color:#1F2937 !important;
+}
 
-    /* KPI VALOR */
-    [data-testid="metric-container"] [data-testid="stMetricValue"] {
-        color: #1F2937 !important;
-        font-weight: 700;
-        font-size: 28px;
-    }
+/* VALOR KPI */
+[data-testid="stMetricValue"]{
+    color:#000000 !important;
+    font-weight:700;
+}
 
     /* CONTENEDOR GRAFICOS */
     div[data-testid="stPlotlyChart"] {
