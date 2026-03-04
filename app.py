@@ -43,7 +43,7 @@ if tema:
 
     /* SIDEBAR */
     section[data-testid="stSidebar"] {
-        background-color: #0B0F19;
+        background-color: #FFFFFF;
     }
 
     /* TEXTO SIDEBAR */
