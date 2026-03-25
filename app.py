@@ -495,12 +495,47 @@ if evento:
 
 df_f = df_temp
 
+# ─────────────────────────────
+# ÚLTIMA FECHA DE CARGA
+# ─────────────────────────────
+
+fecha_col = [c for c in df.columns if "fecha" in c.lower()][0]
+ultima_fecha = df[fecha_col].max()
+
+meses_es = {
+    1:"Enero",2:"Febrero",3:"Marzo",4:"Abril",
+    5:"Mayo",6:"Junio",7:"Julio",8:"Agosto",
+    9:"Septiembre",10:"Octubre",11:"Noviembre",12:"Diciembre"
+}
+
+fecha_texto = f"{ultima_fecha.day} de {meses_es[ultima_fecha.month]} {ultima_fecha.year}"
+
 if df_f.empty:
     st.warning("No hay datos con los filtros seleccionados.")
     st.stop()
 
 # KPIs
 st.markdown("<h1>Dashboard Operaciones GEA</h1>", unsafe_allow_html=True)
+
+st.markdown(
+    f"""
+    <div style="
+        position: fixed;
+        top: 80px;
+        right: 40px;
+        background-color: #1F2E6D;
+        color: white;
+        padding: 10px 16px;
+        border-radius: 10px;
+        font-size: 13px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+        z-index: 1000;">
+        Última carga<br>
+        <b>{fecha_texto}</b>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
 total_asistencias = df_f["Número Asistencia"].count()
 costo_total = df_f["Total de Costo Global"].sum()
