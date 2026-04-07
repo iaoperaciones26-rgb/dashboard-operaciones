@@ -776,22 +776,12 @@ tabla_proveedor["Total general"] = tabla_proveedor.sum(axis=1)
 # Ordenar de mayor a menor
 tabla_proveedor = tabla_proveedor.sort_values("Total general", ascending=False)
 
-# (OPCIONAL) Top 20 proveedores para no saturar pantalla
-tabla_proveedor = tabla_proveedor.head(20)
-
-# Altura fija para ~10 filas
+# Altura fija para scroll (~10 filas visibles)
 altura_tabla = 70 + (10 * 35)
 
+# Mostrar tabla (SOLO UNA VEZ)
 st.dataframe(
     tabla_proveedor.style.format("{:,.0f}"),
     use_container_width=True,
     height=altura_tabla
 )
-
-# Mostrar tabla
-st.dataframe(
-    tabla_proveedor.style.format("{:,.0f}"),
-    use_container_width=True,
-    height=altura_tabla
-)
-
