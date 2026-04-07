@@ -750,7 +750,7 @@ else:
 # TABLA: ASISTENCIAS POR PROVEEDOR Y MES
 # ─────────────────────────────
 
-st.subheader("📊 Asistencias Mensuales por Nombre de Proveedor")
+st.subheader("📊 Asistencias por Nombre de Proveedor")
 
 tabla_proveedor = (
     df_f.groupby(["Nombre del Proveedor", "MES_NOMBRE"], observed=True)["Número Asistencia"]
