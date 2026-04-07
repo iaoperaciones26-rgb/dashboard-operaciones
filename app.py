@@ -587,6 +587,11 @@ fig_asist_mes = px.bar(
     category_orders={
         "MES_NOMBRE": orden_meses,
         "AÑO": sorted(df_f["AÑO"].unique())
+    },
+    labels={
+        "MES_NOMBRE": "MES",
+        "Total Asistencias": "Asistencias",
+        "AÑO": "Año"
     }
 )
 
