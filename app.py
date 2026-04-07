@@ -745,3 +745,48 @@ if not df_cancelados.empty and \
 else:
 
     col_cancel.info("No existen cancelaciones para los filtros seleccionados.")
+
+# ─────────────────────────────
+# TABLA: ASISTENCIAS POR PROVEEDOR Y MES
+# ─────────────────────────────
+
+st.subheader("📊 Asistencias Mensuales por Nombre de Proveedor")
+
+tabla_proveedor = (
+    df_f.groupby(["Nombre del Proveedor", "MES_NOMBRE"], observed=True)["Número Asistencia"]
+    .count()
+    .reset_index()
+)
+
+tabla_proveedor = tabla_proveedor.pivot(
+    index="Nombre del Proveedor",
+    columns="MES_NOMBRE",
+    values="Número Asistencia"
+)
+
+# Ordenar meses
+tabla_proveedor = tabla_proveedor.reindex(columns=orden_meses)
+
+# Reemplazar nulos
+tabla_proveedor = tabla_proveedor.fillna(0).astype(int)
+
+# Total general
+tabla_proveedor["Total general"] = tabla_proveedor.sum(axis=1)
+
+# Ordenar de mayor a menor
+tabla_proveedor = tabla_proveedor.sort_values("Total general", ascending=False)
+
+# (OPCIONAL) Top 20 proveedores para no saturar pantalla
+tabla_proveedor = tabla_proveedor.head(20)
+
+# Altura dinámica
+filas = len(tabla_proveedor)
+altura_tabla = 70 + (filas * 35)
+
+# Mostrar tabla
+st.dataframe(
+    tabla_proveedor.style.format("{:,.0f}"),
+    use_container_width=True,
+    height=altura_tabla
+)
+
