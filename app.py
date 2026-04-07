@@ -779,9 +779,14 @@ tabla_proveedor = tabla_proveedor.sort_values("Total general", ascending=False)
 # (OPCIONAL) Top 20 proveedores para no saturar pantalla
 tabla_proveedor = tabla_proveedor.head(20)
 
-# Altura dinámica
-filas = len(tabla_proveedor)
-altura_tabla = 70 + (filas * 35)
+# Altura fija para ~10 filas
+altura_tabla = 70 + (10 * 35)
+
+st.dataframe(
+    tabla_proveedor.style.format("{:,.0f}"),
+    use_container_width=True,
+    height=altura_tabla
+)
 
 # Mostrar tabla
 st.dataframe(
