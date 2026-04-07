@@ -770,50 +770,18 @@ tabla_proveedor = tabla_proveedor.reindex(columns=orden_meses)
 # Reemplazar nulos
 tabla_proveedor = tabla_proveedor.fillna(0).astype(int)
 
-# Total por proveedor
+# Total general
 tabla_proveedor["Total general"] = tabla_proveedor.sum(axis=1)
 
 # Ordenar de mayor a menor
 tabla_proveedor = tabla_proveedor.sort_values("Total general", ascending=False)
 
-# ───────────── TOTAL GENERAL GLOBAL
-total_general = tabla_proveedor.sum().to_frame().T
-total_general.index = ["TOTAL GENERAL"]
-
-# ───────────── TABLA PRINCIPAL (SCROLL)
+# Altura fija para scroll (~10 filas visibles)
 altura_tabla = 70 + (10 * 35)
 
+# Mostrar tabla (SOLO UNA VEZ)
 st.dataframe(
     tabla_proveedor.style.format("{:,.0f}"),
     use_container_width=True,
     height=altura_tabla
-)
-
-# ───────────── TOTAL FIJO CON ESTILO
-st.markdown(
-    """
-    <div style="
-        background-color:#1F2E6D;
-        padding:8px 12px;
-        border-radius:8px 8px 0px 0px;
-        color:white;
-        font-weight:600;
-        font-size:14px;
-        margin-top:10px;">
-        TOTAL GENERAL
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-st.dataframe(
-    total_general.style
-    .format("{:,.0f}")
-    .set_properties(**{
-        "background-color": "#E8EEF7",
-        "color": "#000000",
-        "font-weight": "bold"
-    }),
-    use_container_width=True,
-    height=80
 )
